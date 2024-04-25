@@ -161,6 +161,22 @@ while (ii < arr.Count)
 return 0;
 */
 
+var borders = new List<List<int>>([[1, 1, 0, 1],
+                                   [1, 1, 1, 2],
+                                   [1, 1, 2, 3],
+                                   [1, 1, 3, 7],
+                                   [1, 1, 7, 11],
+                                   [1, 1, 11, 15],
+                                   [1, 1, 12, 13],
+                                   [1, 1, 13, 14],
+                                   [1, 1, 14, 15],
+                                   [1, 1, 0, 4],
+                                   [1, 1, 4, 8],
+                                   [1, 1, 8, 12]]);
+
+Sym(TestClass.A, TestClass.b, borders);
+
+
 // Для теста узлы:
 // 48 69 70 88 51 52 91 92 55 73 74 95
 FEM3D myFEM3D_test = new();
@@ -171,6 +187,37 @@ myFEM3D_test.SetSolver(new LOS());
 myFEM3D_test.Solve();
 myFEM3D_test.TestOutput(AnswerPath);
 myFEM3D_test.WriteData(AnswerPath);
+
+static void Sym(GlobalMatrix m, GlobalVector v, List<List<int>> borders)
+{
+    foreach (var border in borders)
+    {
+        var al = m._au;
+        var au = m._al;
+        for (int i = 2; i < 6; i++)
+        {
+            for (int j = m._ig[border[i]]; j < m._ig[border[i] + 1]; j++)
+                if (al[j] != 0)
+                {
+                    var k = al[m._jg[j]];
+                    var f = -1.0D * k * v[border[i]];
+                    v[m._jg[j]] += f;
+                    al[j] = 0.0D;
+                }
+            for (int j = 0; j < m._jg.Count; j++)
+                if (m._jg[j] == border[i])
+                    if (au[j] != 0)
+                    {
+                        var k = au[j];
+                        var f = -1.0D * k * v[border[i]];
+                        v[m._jg[j]] += f;
+                        au[m._jg[j]] = 0.0D;
+                    }
+        }
+        m._au = al;
+        m._al = au;
+    }
+}
 return 0;
 
 

@@ -70,7 +70,7 @@ public class FEM3D : FEM
         if (mesh == null) throw new ArgumentNullException("Mesh is null");
         mesh.nodesX = [0.0D, 1.0D, 2.0D];
         mesh.nodesY = [0.0D, 1.0D, 2.0D];
-        mesh.nodesZ = [0.0D, 1.0D, 2.0D, 3.0D];
+        mesh.nodesZ = [0.0D, 1.0D, 2.0D];
         timeMesh = [1.0D];
     }
 
@@ -336,11 +336,9 @@ public class FEM3D : FEM
         for (int t = 0; t < timeMesh.Length; t++)
         {
             using var sw = new StreamWriter(path + $"/A_phi/Answer3D/Answer_{timeMesh[t]}.txt");
-
             for (int i = 0; i < Solutions[t].Size; i++)
-                if (i == 38 || i == 45 || i == 67 || i == 74 || i == 41 || i == 42 || i == 70 || i == 71 || i == 52 || i == 53 || i == 56 || i == 57)
+                if (i == 16 || i == 24 || i == 26 || i == 27 || i == 29 || i == 37)
                     sw.WriteLine($"{i} {Solutions[t][i]:E8}");
-
             sw.Close();
         }
     }

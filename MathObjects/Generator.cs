@@ -79,6 +79,34 @@ public static class Generator
                     var q = antinormal.Item1 * f.Item1 + antinormal.Item2 * f.Item2 + antinormal.Item3 * f.Item3;
                     v[border[i]] = q;
                 }
+
+                // Для симметрии
+                var al = m._au;
+                var au = m._al;
+                for (int i = 2; i < 6; i++)
+                {
+                    for (int j = m._ig[border[i]]; j < m._ig[border[i] + 1]; j++)
+                        if (al[j] != 0)
+                        {
+                            var k = al[m._jg[j]];
+                            var f = -1.0D * k * v[border[i]];
+                            v[m._jg[j]] += f;
+                            al[j] = 0.0D;
+                        }
+                    for (int j = 0; j < m._jg.Count; j++)
+                        if (m._jg[j] == border[i])
+                            if (au[j] != 0)
+                            {
+                                var k = au[m._jg[j]];
+                                var f = -1.0D * k * v[border[i]];
+                                v[m._jg[j]] += f;
+                                au[m._jg[j]] = 0.0D;
+                            }
+                }
+                m._au = al;
+                m._al = au;
+
+
                 break;
                 // КУ - II-го рода
                 case 2:
@@ -91,24 +119,24 @@ public static class Generator
         }
 
         
-        foreach (var border in arrBrd)
-        {
-            for (int i = 2; i < 6; i++)
-            {
-                for (int j = 0; j < m.Size; j++)
-                {
-                    if (border[i] == j)
-                        continue;
-                    else
-                    {
-                        var k = m[j, border[i]];
-                        var f = -1.0D * k * v[border[i]];
-                        v[j] += f;
-                        m[j, border[i]] = 0.0D;
-                    }
-                }
-            }
-        }
+        //foreach (var border in arrBrd)
+        //{
+        //    for (int i = 2; i < 6; i++)
+        //    {
+        //        for (int j = 0; j < m.Size; j++)
+        //        {
+        //            if (border[i] == j)
+        //                continue;
+        //            else
+        //            {
+        //                var k = m[j, border[i]];
+        //                var f = -1.0D * k * v[border[i]];
+        //                v[j] += f;
+        //                m[j, border[i]] = 0.0D;
+        //            }
+        //        }
+        //    }
+        //}
     }
 
     public static void FillVector3D(ref GlobalVector v, ArrayOfRibs arrRibs, ArrayOfElems arrEl, double t)
