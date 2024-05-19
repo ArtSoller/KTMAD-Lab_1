@@ -17,6 +17,10 @@ public record Rib
     public Point a;
     public Point b;
 
+    public (double, double, double) GetNormal() => ((b.X - a.X) / Length,
+                                                    (b.Y - a.Y) / Length,
+                                                    (b.Z - a.Z) / Length);
+
     public Rib()
     {
         a = new Point(0.0D, 0.0D, 0.0D);

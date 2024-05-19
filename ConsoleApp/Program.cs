@@ -174,7 +174,7 @@ var borders = new List<List<int>>([[1, 1, 0, 1],
                                    [1, 1, 4, 8],
                                    [1, 1, 8, 12]]);
 
-Sym(TestClass.A, TestClass.b, borders);
+//Sym(TestClass.A, TestClass.b, borders);
 
 
 // Для теста узлы:

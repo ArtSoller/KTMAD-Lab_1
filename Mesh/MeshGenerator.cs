@@ -176,7 +176,7 @@ public static class MeshGenerator
         return pnt;
     }
 
-    public static ArrayOfElems GenerateListOfElems(Mesh mesh)
+    public static ArrayOfElems GenerateListOfElems(Mesh mesh, ArrayOfRibs arrRibs)
     {
         var arr = new ArrayOfElems(mesh.ElemsAmount);
         
@@ -195,9 +195,20 @@ public static class MeshGenerator
                 for (int i = 0; i < nx - 1; i++)
                 {
                     int curr = i + j * (nx + rx) + k * (rxy + nxy);
-                    arr.Add([               curr,               curr + rx,             curr + rx + 1,               curr + rx + nx,
-                             curr + rxy - j * rx, curr + rxy + 1 - j * rx,  curr + rxy + nx - j * rx, curr + rxy + nx + 1 - j * rx,
-                                curr + rxy + nxy,   curr + rxy + nxy + rx, curr + rxy + nxy + rx + 1,   curr + rxy + nxy + rx + nx]);
+
+                    List<int> arr_i = [               curr,               curr + rx,             curr + rx + 1,               curr + rx + nx,
+                                        curr + rxy - j * rx, curr + rxy + 1 - j * rx,  curr + rxy + nx - j * rx, curr + rxy + nx + 1 - j * rx,
+                                        curr + rxy + nxy,   curr + rxy + nxy + rx, curr + rxy + nxy + rx + 1,   curr + rxy + nxy + rx + nx];
+
+                    for (int ii = 0; ii < arr_i.Count; ii++)
+                    {
+                        if (arrRibs[arr_i[ii]].typeOfRib == TypeOfRib.BoundaryI)
+                        {
+                            arr_i[ii] = -1;
+                        }
+                    }
+    
+                    arr.Add(arr_i);
                     arr.mui.Add(1.0D);
                     arr.sigmai.Add(1.0D);
                 }

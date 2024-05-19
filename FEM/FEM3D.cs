@@ -216,7 +216,7 @@ public class FEM3D : FEM
         if (mesh is null) throw new ArgumentNullException("mesh is null!");
         pointsArr = MeshGenerator.GenerateListOfPoints(mesh);
         ribsArr = MeshGenerator.GenerateListOfRibs(mesh, pointsArr);
-        elemsArr = MeshGenerator.GenerateListOfElems(mesh);
+        elemsArr = MeshGenerator.GenerateListOfElems(mesh, ribsArr);
         bordersArr = MeshGenerator.GenerateListOfBorders(mesh);
         //MeshGenerator.SelectRibs(ref ribsArr, ref elemsArr);
     }
