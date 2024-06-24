@@ -65,12 +65,39 @@ public class FEM3D : FEM
         };
     }
 
-    public void ConstructMesh()
+    public void ConstructMesh(int nx, int ny, int nz)
     {
         if (mesh == null) throw new ArgumentNullException("Mesh is null");
-        mesh.nodesX = [0.0D, 1.0D, 2.0D];
-        mesh.nodesY = [0.0D, 1.0D, 2.0D];
-        mesh.nodesZ = [0.0D, 1.0D, 2.0D];
+        
+        double hx = 2.0D;
+        double hy = 2.0D;
+        double hz = 2.0D;
+        
+        mesh.nodesX = [];
+        mesh.nodesY = [];
+        mesh.nodesZ = [];
+
+        for (int i = 0; i < nx; i++)
+        {
+            double stepx = hx / (nx - 1);
+            mesh.nodesX.Add(i * stepx);
+        }
+
+        for (int i = 0; i < ny; i++)
+        {
+            double stepy = hy / (ny - 1);
+            mesh.nodesY.Add(i * stepy);
+        }
+        
+        for (int i = 0; i < nz; i++)
+        {
+            double stepz = hz / (nz - 1);
+            mesh.nodesZ.Add(i * stepz);
+        }
+
+        ///mesh.nodesX = [0.0D, 1.0D, 2.0D];
+        ///mesh.nodesY = [0.0D, 1.0D, 2.0D];
+        ///mesh.nodesZ = [0.0D, 1.0D, 2.0D];
         timeMesh = [1.0D];
     }
 
@@ -363,6 +390,10 @@ public class FEM3D : FEM
         var relDivY = 0.0D;
         var relDivZ = 0.0D;
 
+        var squareDiffX = 0.0D;
+        var squareDiffY = 0.0D;
+        var squareDiffZ = 0.0D;
+
         int iter = 0;
 
         foreach (var elem in elemsArr)
@@ -391,10 +422,13 @@ public class FEM3D : FEM
             sw.WriteLine($"FEM A  {ans.Item1:E15} {ans.Item2:E15} {ans.Item3:E15}");
             sw.WriteLine($"Theor  {theorValue.Item1:E15} {theorValue.Item2:E15} {theorValue.Item3:E15}");
 
-
             var currAbsDiscX = Math.Abs(ans.Item1 - theorValue.Item1);
             var currAbsDiscY = Math.Abs(ans.Item2 - theorValue.Item2);
             var currAbsDiscZ = Math.Abs(ans.Item3 - theorValue.Item3);
+
+            squareDiffX += currAbsDiscX * currAbsDiscX;
+            squareDiffY += currAbsDiscY * currAbsDiscY;
+            squareDiffZ += currAbsDiscZ * currAbsDiscZ;
 
             var currRelDiscX = currAbsDiscX / Math.Abs(theorValue.Item1);
             var currRelDiscY = currAbsDiscY / Math.Abs(theorValue.Item2);
@@ -423,6 +457,7 @@ public class FEM3D : FEM
         }
         sw.WriteLine($"Avg disc: {absDiscX / iter:E15} {absDiscY / iter:E15} {absDiscZ / iter:E15}");
         sw.WriteLine($"Rel disc: {Math.Sqrt(relDiscX / relDivX):E15} {Math.Sqrt(relDiscY / relDivY):E15} {Math.Sqrt(relDiscZ / relDivZ):E15}");
+        sw.WriteLine($"SKO: {Math.Sqrt(squareDiffX / elemsArr.Length):E15} {Math.Sqrt(squareDiffY / elemsArr.Length):E15} {Math.Sqrt(squareDiffZ / elemsArr.Length):E15}");
         sw.Close();
     }
 }

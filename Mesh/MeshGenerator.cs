@@ -199,14 +199,6 @@ public static class MeshGenerator
                     List<int> arr_i = [               curr,               curr + rx,             curr + rx + 1,               curr + rx + nx,
                                         curr + rxy - j * rx, curr + rxy + 1 - j * rx,  curr + rxy + nx - j * rx, curr + rxy + nx + 1 - j * rx,
                                         curr + rxy + nxy,   curr + rxy + nxy + rx, curr + rxy + nxy + rx + 1,   curr + rxy + nxy + rx + nx];
-
-                    for (int ii = 0; ii < arr_i.Count; ii++)
-                    {
-                        if (arrRibs[arr_i[ii]].typeOfRib == TypeOfRib.BoundaryI)
-                        {
-                            arr_i[ii] = -1;
-                        }
-                    }
     
                     arr.Add(arr_i);
                     arr.mui.Add(1.0D);

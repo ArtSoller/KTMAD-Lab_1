@@ -101,33 +101,6 @@ public static class Generator
                     v[border[i]] = q;
                 }
 
-                // Для симметрии
-                var al = m._au;
-                var au = m._al;
-                for (int i = 2; i < 6; i++)
-                {
-                    for (int j = m._ig[border[i]]; j < m._ig[border[i] + 1]; j++)
-                        if (al[j] != 0)
-                        {
-                            var k = al[m._jg[j]];
-                            var f = -1.0D * k * v[border[i]];
-                            v[m._jg[j]] += f;
-                            al[j] = 0.0D;
-                        }
-                    for (int j = 0; j < m._jg.Count; j++)
-                        if (m._jg[j] == border[i])
-                            if (au[j] != 0)
-                            {
-                                var k = au[m._jg[j]];
-                                var f = -1.0D * k * v[border[i]];
-                                v[m._jg[j]] += f;
-                                au[m._jg[j]] = 0.0D;
-                            }
-                }
-                m._au = al;
-                m._al = au;
-
-
                 break;
                 // КУ - II-го рода
                 case 2:
@@ -212,7 +185,6 @@ public static class Generator
     public static void BuildPortait(ref GlobalMatrix m, int arrPtLen, ArrayOfElems arrEl)
     {
         List<List<int>> arr = [];
-        List<int> notFalseNodes = [];
 
         // ! Дерьмодристный момент.
         for(int i = 0; i < arrPtLen; i++)
@@ -221,14 +193,9 @@ public static class Generator
         foreach (var _elem in arrEl)
             foreach (var point in _elem)
                 foreach (var pnt in _elem)
-                    if (pnt < point && Array.IndexOf(arr[point].ToArray(), pnt) == -1 && point != -1 && pnt != -1)
+                    if (pnt < point && Array.IndexOf(arr[point].ToArray(), pnt) == -1)
                     {
                         arr[point].Add(pnt);
-                        arr[point].Sort();
-                        if (notFalseNodes.BinarySearch(pnt) < 0)
-                            notFalseNodes.Add(pnt);
-                        if (notFalseNodes.BinarySearch(point) < 0)
-                            notFalseNodes.Add(point);
                     }
 
         m._ig[0] = 0;
@@ -240,10 +207,6 @@ public static class Generator
         m._al = new double[m._jg.Count];
         m._au = new double[m._jg.Count];
 
-        // Только векторный мкэ.
-        for (int i = 0; i < m._diag.Length; i++)
-            if (notFalseNodes.BinarySearch(i) < 0)
-                m._diag[i] = 1;
     }
 
     public static void FillMatrix(ref GlobalMatrix m, ArrayOfPoints arrPt, ArrayOfElems arrEl, TypeOfMatrixM typeOfMatrixM)
@@ -328,40 +291,34 @@ public static class Generator
         int ii = 0;
         foreach (var i in elem)
         {
-            if (i != -1)
-            {
                 int jj = 0;
                 foreach (var j in elem)
                 {
-                    if (j != -1)
+                    int ind = 0;
+                    double val = 0.0D;
+                    switch(i - j)
                     {
-                        int ind = 0;
-                        double val = 0.0D;
-                        switch(i - j)
-                        {
-                            case 0:
-                                val = lm[ii, jj];
-                                gm._diag[i] += lm[ii, jj];
-                                break;
-                            case < 0:
-                                ind = gm._ig[j];
-                                for (; ind <= gm._ig[j + 1] - 1; ind++)
-                                    if (gm._jg[ind] == i) break;
-                                val = lm[ii, jj];
-                                gm._au[ind] += lm[ii, jj];
-                                break;
-                            case > 0:
-                                ind = gm._ig[i];
-                                for (; ind <= gm._ig[i + 1] - 1; ind++)
-                                    if (gm._jg[ind] == j) break;
-                                val = lm[ii, jj];
-                                gm._al[ind] += lm[ii, jj];
-                                break;
-                        }
+                        case 0:
+                            val = lm[ii, jj];
+                            gm._diag[i] += lm[ii, jj];
+                            break;
+                        case < 0:
+                            ind = gm._ig[j];
+                            for (; ind <= gm._ig[j + 1] - 1; ind++)
+                                if (gm._jg[ind] == i) break;
+                            val = lm[ii, jj];
+                            gm._au[ind] += lm[ii, jj];
+                            break;
+                        case > 0:
+                            ind = gm._ig[i];
+                            for (; ind <= gm._ig[i + 1] - 1; ind++)
+                                if (gm._jg[ind] == j) break;
+                            val = lm[ii, jj];
+                            gm._al[ind] += lm[ii, jj];
+                            break;
                     }
                     jj++;
                 }
-            }
             ii++;
         }
     }

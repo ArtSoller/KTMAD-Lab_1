@@ -180,7 +180,7 @@ var borders = new List<List<int>>([[1, 1, 0, 1],
 // Для теста узлы:
 // 48 69 70 88 51 52 91 92 55 73 74 95
 FEM3D myFEM3D_test = new();
-myFEM3D_test.ConstructMesh();
+myFEM3D_test.ConstructMesh(3, 6, 3);
 myFEM3D_test.GenerateArrays();
 myFEM3D_test.ConstructMatrixAndVector();
 myFEM3D_test.SetSolver(new LOS());
