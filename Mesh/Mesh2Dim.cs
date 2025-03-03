@@ -15,21 +15,13 @@ public class Mesh2Dim : Mesh
         set => ElemsAmount = value;
     }
 
-    public int NodesAmountX
-    { 
-        get => nodesX.Count; 
-    }
+    public int NodesAmount => nodesX.Count * nodesY.Count ; 
 
     internal List<int> nodesXRefs;
 
     internal ImmutableArray<double> NodesXWithoutFragmentation { get; set; }
 
     internal string? infoAboutX;
-
-    public int NodesAmountY 
-    { 
-        get => nodesY.Count;
-    }
 
     internal List<int> nodesYRefs;
 
@@ -40,13 +32,13 @@ public class Mesh2Dim : Mesh
 
     public Mesh2Dim()
     {
-        borders = new();
-        Elems = new();
-        nodesZ = new();
-        nodesR = new();
-        nodesXRefs = new();
-        nodesYRefs = new();
-        mu0 = new();
-        sigma = new();
+        borders = [];
+        Elems = [];
+        nodesX = [];
+        nodesY = [];
+        nodesXRefs = [];
+        nodesYRefs = [];
+        mu0 = [];
+        sigma = [];
     }
 }

@@ -79,17 +79,16 @@ public static class MeshReader
             // Считывание параметров для расчетной области.
             using (var sr = new StreamReader(_currPath))
             {
-                mesh.nodesX = sr.ReadLine().Split().Select(double.Parse).ToList();
+                mesh.nodesX = [.. sr.ReadLine().Split().Select(double.Parse)];
                 for (int i = 0; i < mesh.nodesX.Count; i++)
                     mesh.nodesXRefs.Add(i);
-                mesh.NodesXWithoutFragmentation = mesh.nodesX.ToImmutableArray();
+                mesh.NodesXWithoutFragmentation = [.. mesh.nodesX];
                 mesh.infoAboutX = sr.ReadLine() ?? "";
 
-
-                mesh.nodesY = sr.ReadLine().Split().Select(double.Parse).ToList();
+                mesh.nodesY = [.. sr.ReadLine().Split().Select(double.Parse)];
                 for (int i = 0; i < mesh.nodesY.Count; i++)
                     mesh.nodesYRefs.Add(i);
-                mesh.NodesYWithoutFragmentation = mesh.nodesY.ToImmutableArray();
+                mesh.NodesYWithoutFragmentation = [.. mesh.nodesY];
                 mesh.infoAboutY = sr.ReadLine() ?? "";
 
                 int elemsAmount = int.Parse(sr.ReadLine() ?? "0");
@@ -111,7 +110,7 @@ public static class MeshReader
             {
                 mesh.bordersAmount = int.Parse(sr.ReadLine() ?? "0");
                 for (int i = 0; i < mesh.bordersAmount; i++)
-                    mesh.borders.Add(sr.ReadLine().Split().Select(int.Parse).ToList());
+                    mesh.borders.Add([.. sr.ReadLine().Split().Select(int.Parse)]);
             }
         }
         catch (IOException ex)
@@ -122,27 +121,9 @@ public static class MeshReader
         catch (Exception ex)
         {
             Console.WriteLine($"Error during reading {_currPath} file: {ex}");
-            throw new IOException();
+            throw new Exception();
         }
     }      
-
-    public static Layer ReadField(string path)
-    {
-        using var sr = new StreamReader(path);
-        double z0;
-        double z1;
-        double mu;
-        double sigma;
-
-        var arr = sr.ReadLine().Split().Select(double.Parse).ToList();
-        z0 = arr[0];
-        z1 = arr[1];
-        
-        arr = sr.ReadLine().Split().Select(double.Parse).ToList();
-        mu = arr[0];
-        sigma = arr[1];
-        return new Layer(z0, z1, mu, sigma);
-    }
 
     public static Mesh3Dim ReadMesh(string path)
     {

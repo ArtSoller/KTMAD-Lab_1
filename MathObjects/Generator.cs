@@ -1,11 +1,29 @@
 using DataStructs;
 using Functions;
-using Functions;
 
 namespace MathObjects;
 
 public static class Generator
 {
+
+    public static void FillMatrixG2D(ref GlobalMatrix m, ArrayOfRibs arrRibs, ArrayOfElems arrEl)
+    {
+        m._al = new double[m._jg.Count];
+        m._au = new double[m._jg.Count];
+
+        for (int i = 0; i < arrEl.Length; i++)
+        {
+            List<int> currElem = [arrEl[i][1], arrEl[i][2],
+                                  arrEl[i][0], arrEl[i][3]];
+            
+
+            double hx = arrRibs[currElem[2]].Length;
+            double hy = arrRibs[currElem[0]].Length;
+            var lm = new LocalMatrixG2D(arrEl.mui[i], hx, hy);
+            Add(lm, ref m, currElem); 
+        }
+    }
+
     public static void FillMatrixG(ref GlobalMatrix m, ArrayOfRibs arrRibs, ArrayOfElems arrEl)
     {
         m._al = new double[m._jg.Count];
@@ -34,6 +52,24 @@ public static class Generator
 
             var lm = new LocalMatrixG3D(arrEl.mui[i], hx, hy, hz);
             Add(lm, ref m, currElem); 
+        }
+    }
+
+    public static void FillMatrixM2D(ref GlobalMatrix m, ArrayOfRibs arrRibs, ArrayOfElems arrEl)
+    {
+        m._al = new double[m._jg.Count];
+        m._au = new double[m._jg.Count];
+
+        for (int i = 0; i < arrEl.Length; i++)
+        {
+            List<int> currElem = [arrEl[i][1], arrEl[i][2],
+                                  arrEl[i][0], arrEl[i][3]];
+            
+            double hx = arrRibs[currElem[2]].Length;
+            double hy = arrRibs[currElem[0]].Length;
+            
+            var lm = new LocalMatrixM2D(arrEl.mui[i], hx, hy);
+            Add(lm, ref m, currElem);
         }
     }
 
@@ -195,6 +231,7 @@ public static class Generator
                     if (pnt < point && Array.IndexOf(arr[point].ToArray(), pnt) == -1)
                     {
                         arr[point].Add(pnt);
+                        arr[point].Sort();
                     }
 
         m._ig[0] = 0;
@@ -208,7 +245,90 @@ public static class Generator
 
     }   
 
-    
+    private static void Add(LocalMatrixG2D lm, ref GlobalMatrix gm, List<int> elem)
+    {
+        if (gm._diag is null) throw new Exception("_diag isn't initialized");
+        if (gm._ig is null) throw new Exception("_ig isn't initialized");
+        if (gm._au is null) throw new Exception("_au isn't initialized");
+        if (gm._al is null) throw new Exception("_au isn't initialized");
+        
+        int ii = 0;
+        foreach (var i in elem)
+        {
+            int jj = 0;
+            foreach (var j in elem)
+            {
+                int ind = 0;
+                double val = 0.0D;
+                switch(i - j)
+                {
+                    case 0:
+                        val = lm[ii, jj];
+                        gm._diag[i] += lm[ii, jj];
+                        break;
+                    case < 0:
+                        ind = gm._ig[j];
+                        for (; ind <= gm._ig[j + 1] - 1; ind++)
+                            if (gm._jg[ind] == i) break;
+                        val = lm[ii, jj];
+                        gm._au[ind] += lm[ii, jj];
+                        break;
+                    case > 0:
+                        ind = gm._ig[i];
+                        for (; ind <= gm._ig[i + 1] - 1; ind++)
+                            if (gm._jg[ind] == j) break;
+                        val = lm[ii, jj];
+                        gm._al[ind] += lm[ii, jj];
+                        break;
+                }
+                jj++;
+            }
+            ii++;
+        }
+    }
+
+    private static void Add(LocalMatrixM2D lm, ref GlobalMatrix gm, List<int> elem)
+    {
+        if (gm._diag is null) throw new Exception("_diag isn't initialized");
+        if (gm._ig is null) throw new Exception("_ig isn't initialized");
+        if (gm._au is null) throw new Exception("_au isn't initialized");
+        if (gm._al is null) throw new Exception("_au isn't initialized");
+        
+        
+        int ii = 0;
+        foreach (var i in elem)
+        {
+                int jj = 0;
+                foreach (var j in elem)
+                {
+                    int ind = 0;
+                    double val = 0.0D;
+                    switch(i - j)
+                    {
+                        case 0:
+                            val = lm[ii, jj];
+                            gm._diag[i] += lm[ii, jj];
+                            break;
+                        case < 0:
+                            ind = gm._ig[j];
+                            for (; ind <= gm._ig[j + 1] - 1; ind++)
+                                if (gm._jg[ind] == i) break;
+                            val = lm[ii, jj];
+                            gm._au[ind] += lm[ii, jj];
+                            break;
+                        case > 0:
+                            ind = gm._ig[i];
+                            for (; ind <= gm._ig[i + 1] - 1; ind++)
+                                if (gm._jg[ind] == j) break;
+                            val = lm[ii, jj];
+                            gm._al[ind] += lm[ii, jj];
+                            break;
+                    }
+                    jj++;
+                }
+            ii++;
+        }
+    }
 
     private static void Add(LocalMatrixG3D lm, ref GlobalMatrix gm, List<int> elem)
     {

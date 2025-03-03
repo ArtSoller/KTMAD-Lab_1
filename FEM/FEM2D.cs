@@ -1,4 +1,4 @@
-﻿namespace Project;
+namespace Project;
 
 using System.Collections.Immutable;
 using System.Numerics;
@@ -17,55 +17,19 @@ public class FEM2D : FEM
 
     public ArrayOfRibs ribsArr;
 
+    public FEM2D(Mesh2Dim mesh)
+    {
+        mesh2D = mesh;
+    }
 
-
-    // Maybe private?
-    public List<Layer> Layers;
-
-    public FEM2D()
-    {       
-        Layers = [];
-        mesh2D = new Mesh2Dim
-        {
-            nodesX = [],
-            nodesY = []
-        };
-    } 
-
-    public void GenerateArrays2D(string MeshInfo, string BordersInfo)
+    public void GenerateArrays()
     {
         timeMesh = [1.0D];
         if (mesh2D is null) throw new ArgumentNullException("mesh is null!");
-        MeshReader.ReadMesh2D(MeshInfo, BordersInfo, ref mesh2D);
-        MeshGenerator.GenerateMesh(ref mesh2D);
         pointsArr = MeshGenerator.GenerateListOfPoints(mesh2D);
         ribsArr = MeshGenerator.GenerateListOfRibs(mesh2D, pointsArr);
-        elemsArr = MeshGenerator.GenerateListOfElems(ref mesh2D, ribsArr);
+        elemsArr = MeshGenerator.GenerateListOfElems2D(ref mesh2D);
         bordersArr = MeshGenerator.GenerateListOfBorders(mesh2D);
-        Console.WriteLine();
-        //MeshGenerator.SelectRibs(ref ribsArr, ref elemsArr);
-    }
-
-    public void AddField(Layer layer)
-    {
-        ArgumentNullException.ThrowIfNull(layer);
-        Layers.Add(layer);
-    }
-
-    public void CommitFields()
-    {
-        if (elemsArr is null) throw new ArgumentNullException("elemsArr is null");
-
-        foreach (var layer in Layers)
-        {
-            for (int i = 0; i < elemsArr.Length; i++)
-            {
-                double minz = Math.Min(ribsArr[elemsArr[i][^1]].a.Z, ribsArr[elemsArr[i][^1]].b.Z);
-                double maxz = Math.Max(ribsArr[elemsArr[i][^1]].a.Z, ribsArr[elemsArr[i][^1]].b.Z);
-                if (layer.z0 <= minz && maxz <= layer.z1)
-                    elemsArr.sigmai[i] = layer.sigma;
-            }
-        }
     }
 
     public void ConstructMatrixAndVector()
@@ -77,7 +41,7 @@ public class FEM2D : FEM
         Generator.BuildPortait(ref sparceMatrix, ribsArr.Count, elemsArr);
 
         var G = new GlobalMatrix(sparceMatrix);
-        Generator.FillMatrixG(ref G, ribsArr, elemsArr);
+        Generator.FillMatrixG2D(ref G, ribsArr, elemsArr);
 
         var M = new GlobalMatrix(sparceMatrix);
         Generator.FillMatrixM(ref M, ribsArr, elemsArr);

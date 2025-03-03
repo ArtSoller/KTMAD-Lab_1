@@ -42,10 +42,10 @@ public class Point
         Type = Location.NotStated;
     }
 
-    public Point(double R, double Z)
+    public Point(double X, double Y)
     {
-        this.R = R;
-        this.Z = Z;
+        this.X = X;
+        this.Y = Y;
         Type = Location.NotStated;
     }
 

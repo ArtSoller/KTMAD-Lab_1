@@ -28,8 +28,6 @@ public class FEM3D : FEM
 
     public ArrayOfRibs ribsArr;
 
-    // Maybe private?
-    public List<Layer> Layers;
 
     public FEM3D()
     {
@@ -39,7 +37,6 @@ public class FEM3D : FEM
         Ex_3D = [];
         Ey_3D = [];
         Ez_3D = [];
-        Layers = [];
         mesh = new Mesh3Dim
         {
             nodesX = [],
@@ -95,28 +92,6 @@ public class FEM3D : FEM
         bordersArr = MeshGenerator.GenerateListOfBorders(mesh);
         Console.WriteLine();
         //MeshGenerator.SelectRibs(ref ribsArr, ref elemsArr);
-    }
-
-    public void AddField(Layer layer)
-    {
-        ArgumentNullException.ThrowIfNull(layer);
-        Layers.Add(layer);
-    }
-
-    public void CommitFields()
-    {
-        if (elemsArr is null) throw new ArgumentNullException("elemsArr is null");
-
-        foreach (var layer in Layers)
-        {
-            for (int i = 0; i < elemsArr.Length; i++)
-            {
-                double minz = Math.Min(ribsArr[elemsArr[i][^1]].a.Z, ribsArr[elemsArr[i][^1]].b.Z);
-                double maxz = Math.Max(ribsArr[elemsArr[i][^1]].a.Z, ribsArr[elemsArr[i][^1]].b.Z);
-                if (layer.z0 <= minz && maxz <= layer.z1)
-                    elemsArr.sigmai[i] = layer.sigma;
-            }
-        }
     }
 
     public void ConstructMatrixAndVector()
