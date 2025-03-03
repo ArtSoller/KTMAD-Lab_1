@@ -27,7 +27,9 @@ public abstract class FEM
 
     protected internal EquationType equationType;
 
-    private protected Mesh? mesh;
+    private protected Mesh3Dim? mesh;
+    private protected Mesh2Dim? mesh2D;
+
 
     protected ISolver? solver;
 

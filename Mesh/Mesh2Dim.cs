@@ -6,36 +6,36 @@ public class Mesh2Dim : Mesh
 {
     public override int NodesAmountTotal 
     { 
-        get => NodesAmountR * NodesAmountZ;
+        get => NodesAmountX * NodesAmountY;
     }
 
     public override int ElemsAmount
     {
-        get => (NodesAmountR - 1) * (NodesAmountZ - 1);
+        get => (NodesAmountX - 1) * (NodesAmountY - 1);
         set => ElemsAmount = value;
     }
 
-    public int NodesAmountR
+    public int NodesAmountX
     { 
-        get => nodesR.Count; 
+        get => nodesX.Count; 
     }
 
-    internal List<int> nodesR_Refs;
+    internal List<int> nodesXRefs;
 
-    internal ImmutableArray<double> NodesRWithoutFragmentation { get; set; }
+    internal ImmutableArray<double> NodesXWithoutFragmentation { get; set; }
 
-    internal string? infoAboutR;
+    internal string? infoAboutX;
 
-    public int NodesAmountZ 
+    public int NodesAmountY 
     { 
-        get => nodesZ.Count;
+        get => nodesY.Count;
     }
 
-    internal List<int> nodesZRefs;
+    internal List<int> nodesYRefs;
 
-    public ImmutableArray<double> NodesZWithoutFragmentation { get; set; }
+    public ImmutableArray<double> NodesYWithoutFragmentation { get; set; }
 
-    internal string? infoAboutZ;
+    internal string? infoAboutY;
     
 
     public Mesh2Dim()
@@ -44,8 +44,8 @@ public class Mesh2Dim : Mesh
         Elems = new();
         nodesZ = new();
         nodesR = new();
-        nodesR_Refs = new();
-        nodesZRefs = new();
+        nodesXRefs = new();
+        nodesYRefs = new();
         mu0 = new();
         sigma = new();
     }

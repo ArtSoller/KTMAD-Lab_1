@@ -1,365 +1,333 @@
-﻿using MathObjects;
+﻿namespace Project;
+
+using System.Collections.Immutable;
+using System.Numerics;
+using MathObjects;
 using Solver;
 using Grid;
+using DataStructs;
 using System.Diagnostics;
 using Functions;
-
-namespace Project;
+using System.ComponentModel.DataAnnotations;
+using System.Timers;
+using System;
 
 public class FEM2D : FEM
 {
+
+    public ArrayOfRibs ribsArr;
+
+
+
+    // Maybe private?
+    public List<Layer> Layers;
+
     public FEM2D()
+    {       
+        Layers = [];
+        mesh2D = new Mesh2Dim
+        {
+            nodesX = [],
+            nodesY = []
+        };
+    } 
+
+    public void GenerateArrays2D(string MeshInfo, string BordersInfo)
     {
-        Mesh2D = new();
-        mu0 = [];
-        sigma = [];
+        timeMesh = [1.0D];
+        if (mesh2D is null) throw new ArgumentNullException("mesh is null!");
+        MeshReader.ReadMesh2D(MeshInfo, BordersInfo, ref mesh2D);
+        MeshGenerator.GenerateMesh(ref mesh2D);
+        pointsArr = MeshGenerator.GenerateListOfPoints(mesh2D);
+        ribsArr = MeshGenerator.GenerateListOfRibs(mesh2D, pointsArr);
+        elemsArr = MeshGenerator.GenerateListOfElems(ref mesh2D, ribsArr);
+        bordersArr = MeshGenerator.GenerateListOfBorders(mesh2D);
+        Console.WriteLine();
+        //MeshGenerator.SelectRibs(ref ribsArr, ref elemsArr);
     }
 
-    public Mesh2Dim Mesh2D; 
-
-    public GlobalVector[] A_phi;
-
-    public GlobalVector[] E_phi2D;
-
-    public void ReadData(string infoPath, string bordersPath, string timePath)
+    public void AddField(Layer layer)
     {
-        MeshReader.ReadMesh(infoPath, bordersPath, ref Mesh2D);
-        using var sr = new StreamReader(timePath);
-        SetTimeMesh(sr.ReadLine() ?? "0 0 1");        
-        Debug.WriteLine("All data read correctly");
+        ArgumentNullException.ThrowIfNull(layer);
+        Layers.Add(layer);
     }
 
-    public void ConstructMesh()
+    public void CommitFields()
     {
-        MeshGenerator.GenerateMesh(ref Mesh2D);
-        MeshGenerator.OutputPoints(ref Mesh2D);
-        pointsArr = new();
-        MeshGenerator.GenerateListOfElems(ref Mesh2D, pointsArr);
-        MeshGenerator.GenerateListOfBorders(ref Mesh2D);
-        Debug.WriteLine("Mesh built correctly");
+        if (elemsArr is null) throw new ArgumentNullException("elemsArr is null");
+
+        foreach (var layer in Layers)
+        {
+            for (int i = 0; i < elemsArr.Length; i++)
+            {
+                double minz = Math.Min(ribsArr[elemsArr[i][^1]].a.Z, ribsArr[elemsArr[i][^1]].b.Z);
+                double maxz = Math.Max(ribsArr[elemsArr[i][^1]].a.Z, ribsArr[elemsArr[i][^1]].b.Z);
+                if (layer.z0 <= minz && maxz <= layer.z1)
+                    elemsArr.sigmai[i] = layer.sigma;
+            }
+        }
     }
 
-    public void SubmitGeneratedData()
+    public void ConstructMatrixAndVector()
     {
-        elemsArr = new();
-        bordersArr = new();
-        mu0 = Mesh2D.mu0;
-        sigma = Mesh2D.sigma;
-        Debug.WriteLine("Generated data submited");
+        if (elemsArr is null) throw new ArgumentNullException("elemsArr is null");
+        if (bordersArr is null) throw new ArgumentNullException("bordersArr is null");
+
+        var sparceMatrix = new GlobalMatrix(ribsArr.Count);
+        Generator.BuildPortait(ref sparceMatrix, ribsArr.Count, elemsArr);
+
+        var G = new GlobalMatrix(sparceMatrix);
+        Generator.FillMatrixG(ref G, ribsArr, elemsArr);
+
+        var M = new GlobalMatrix(sparceMatrix);
+        Generator.FillMatrixM(ref M, ribsArr, elemsArr);
+
+        Matrix = G + M;
+
+        var b = new GlobalVector(ribsArr.Count);
+        Generator.FillVector3D(ref b, ribsArr, elemsArr, 0.0);
+        Vector = b;
+
+        Generator.ConsiderBoundaryConditions(ref Matrix, ref Vector, ribsArr, bordersArr, 0.0D);
     }
 
     public void Solve()
     {
-        if (pointsArr is null) throw new ArgumentNullException("points array is null !");
-        if (elemsArr is null) throw new ArgumentNullException("elems array is null !");
-        if (bordersArr is null) throw new ArgumentNullException("borders array is null !");
-        if (Solutions is null) throw new ArgumentNullException("solutions array is null !");
-        if (Discrepancy is null) throw new ArgumentNullException("discrepancy array is null !");
-        if (solver is null) throw new ArgumentNullException("solver is null !");
+        if (solver is null) throw new ArgumentNullException("Solver is null");
+        if (Matrix is null) throw new ArgumentNullException("Matrix is null");
+        if (Vector is null) throw new ArgumentNullException("Vector is null");
+        Solutions = new GlobalVector[timeMesh.Length];
+        Discrepancy = new GlobalVector[timeMesh.Length];
+        (Solutions[0], Discrepancy[0]) = solver.Solve(Matrix, Vector);
+        //
+        //if (timeMesh.Length > 1)
+        //{
+        //    for (int i = 0; i < timeMesh.Length; i++)
+        //    {
+        //        if (i == 1 || i == 0)
+        //        {
+        //            Solutions[i] = new GlobalVector(ribsArr.Count);
+        //            for (int j = 0; j < ribsArr.Count; j++)
+        //            {
+        //                var antinormal = ((ribsArr[j].b.X - ribsArr[j].a.X) / ribsArr[j].Length,
+        //                                  (ribsArr[j].b.Y - ribsArr[j].a.Y) / ribsArr[j].Length,
+        //                                  (ribsArr[j].b.Z - ribsArr[j].a.Z) / ribsArr[j].Length);
+        //                var pointat = ((ribsArr[j].b.X + ribsArr[j].a.X) / 2.0D,
+        //                               (ribsArr[j].b.Y + ribsArr[j].a.Y) / 2.0D,
+        //                               (ribsArr[j].b.Z + ribsArr[j].a.Z) / 2.0D);
 
-        switch(equationType)
-        {
-            case EquationType.Elliptic:
-                Matrix = new GlobalMatrix(pointsArr.Length);
-                Vector = new GlobalVector(pointsArr);
+        //                var valueat = Function.A(pointat.Item1, pointat.Item2, pointat.Item3, timeMesh[i]);
+        //                Solutions[i][j] = valueat.Item1 * antinormal.Item1 + valueat.Item2 * antinormal.Item2 + valueat.Item3 * antinormal.Item3;
+        //            }
+        //            continue;
+        //        }
+        //        double t0 = timeMesh[i];
+        //        double t1 = timeMesh[i - 1];
+        //        double t2 = timeMesh[i - 2];
+        //        
+        //        double deltT = t0 - t2;
+        //        double deltT0 = t0 - t1;
+        //        double deltT1 = t1 - t2;
+        //    
+        //        double tau0 = (deltT + deltT0) / (deltT * deltT0);
+        //        double tau1 = deltT / (deltT1 * deltT0);
+        //        double tau2 = deltT0 / (deltT * deltT1);
+        //    
+        //        var sparceMatrix = new GlobalMatrix(ribsArr.Count);
+        //        Generator.BuildPortait(ref sparceMatrix, ribsArr.Count, elemsArr);
 
-                Generator.BuildPortait(ref Matrix, pointsArr.Length, elemsArr);
-                Generator.FillMatrix(ref Matrix, pointsArr, elemsArr, TypeOfMatrixM.Mrr);
+        //        var G = new GlobalMatrix(sparceMatrix);
+        //        Generator.FillMatrixG(ref G, ribsArr, elemsArr);
+        //
+        //        var M = new GlobalMatrix(sparceMatrix);
+        //        Generator.FillMatrixM(ref M, ribsArr, elemsArr);
+        //
+        //        Matrix = G + M + tau0 * M;
 
-                Generator.FillVector(ref Vector, pointsArr, elemsArr, 1.0);
-                Generator.ConsiderBoundaryConditions(ref Matrix ,ref Vector, pointsArr, bordersArr, 1.0D);
+        //        var b = new GlobalVector(ribsArr.Count);
+        //        Generator.FillVector3D(ref b, ribsArr, elemsArr, timeMesh[i]);
+        //        Vector = b - tau2 * M * Solutions[i - 2] + tau1 * M * Solutions[i - 1];
 
-                (Solutions[0], Discrepancy[0]) = solver.Solve(Matrix, Vector);
-            break;
-
-            case EquationType.Parabolic:
-                if (timeMesh is null) throw new ArgumentNullException("timeMesh is null!");
-
-                for (int i = 0; i < timeMesh.Length; i++)
-                {
-                    Debug.WriteLine($"\nTime layer: {timeMesh[i]}");
-                    Thread.Sleep(1500);
-                    if (i == 0)
-                    {
-#if RELEASE
-                        Matrix = new GlobalMatrix(pointsArr.Length);
-                        Generator.BuildPortait(ref Matrix, pointsArr.Length, elemsArr);
-                        Generator.FillMatrix(ref Matrix, pointsArr, elemsArr, bordersArr, TypeOfMatrixM.Mrr);
-                        Vector = new GlobalVector(pointsArr);
-                        (Solutions[0], Discrepancy[0]) = solver.Solve(Matrix, Vector);
-#endif
-#if DEBUG
-                        Solutions[0] = new GlobalVector(pointsArr.Length);
-                        for (int j = 0; j < Solutions[0].Size; j++)
-                            Solutions[0][j] = Function.U(pointsArr[j].R, pointsArr[j].Z, timeMesh[i]);
-#endif
-                    }
-                    else if (i == 1)
-                    {
-#if RELEASE
-                        Solutions[i] = Solutions[i - 1];
-#endif
-#if DEBUG
-                        Solutions[1] = new GlobalVector(pointsArr.Length);
-                        for (int j = 0; j < Solutions[1].Size; j++)
-                            Solutions[1][j] = Function.U(pointsArr[j].R, pointsArr[j].Z, timeMesh[i]);
-#endif
-                    }
-                    else
-                    {
-                        double deltT = timeMesh[i] - timeMesh[i - 2];
-                        double deltT0 = timeMesh[i] - timeMesh[i - 1];
-                        double deltT1 = timeMesh[i - 1] - timeMesh[i - 2];
-
-                        double tau0 = (deltT + deltT0) / (deltT * deltT0);
-                        double tau1 = deltT / (deltT1 * deltT0);
-                        double tau2 = deltT0 / (deltT * deltT1);
-
-                        var matrix1 = new GlobalMatrix(pointsArr.Length);
-                        Generator.BuildPortait(ref matrix1, pointsArr.Length, elemsArr);
-                        Generator.FillMatrix(ref matrix1, pointsArr, elemsArr, TypeOfMatrixM.Mrr);
-                        Generator.ConsiderBoundaryConditions(ref matrix1, bordersArr);
-
-                        var M = new GlobalMatrix(pointsArr.Length); // ???
-                        Generator.BuildPortait(ref M, pointsArr.Length, elemsArr);
-                        Generator.FillMatrix(ref M, pointsArr, elemsArr, TypeOfMatrixM.Mr);
-                        Generator.ConsiderBoundaryConditions(ref M, bordersArr);
-
-                        Matrix = (tau0 * M) + matrix1;
-                        Generator.ConsiderBoundaryConditions(ref Matrix, bordersArr);
-
-                        var bi = new GlobalVector(pointsArr);
-                        Generator.FillVector(ref bi, pointsArr, elemsArr, timeMesh[i]);
-                        Generator.ConsiderBoundaryConditions(ref bi, pointsArr, bordersArr, timeMesh[i]);
-
-                        Vector = bi - (tau2 * M * Solutions[i - 2]) + (tau1 * M * Solutions[i - 1]);
-                        Generator.ConsiderBoundaryConditions(ref Vector, pointsArr, bordersArr, timeMesh[i]);
-                        
-                        (Solutions[i], Discrepancy[i]) = solver.Solve(Matrix, Vector);
-                    }
-                }
-            break;
-        }
-        A_phi = Solutions;
-        Debug.WriteLine("Lin eq solved");
+        //        Generator.ConsiderBoundaryConditions(ref Matrix, ref Vector, ribsArr, bordersArr, timeMesh[i]);
+        //        (Solutions[i], Discrepancy[i]) = solver.Solve(Matrix, Vector);
+        //    }
+        //}
     }
 
-    public void WriteData()
+    public void WriteData(string path)
     {
-        if (Answer is null)
-            throw new Exception("Vector _answer is null");
-        for (int i = 0; i < Answer.Size; i++)
-            Console.WriteLine($"{Answer[i]:E15}");
-    }
+        if (Solutions is null) throw new ArgumentNullException("No solutions");
 
-    public void WriteData(string _path)
-    {
-        if (A_phi is null) throw new ArgumentNullException();
-        //if (E_phi2D is null) throw new ArgumentNullException();
-        if (timeMesh is not null)
+        for (int t = 0; t < timeMesh.Length; t++)
         {
-            for (int i = 0; i < timeMesh.Length; i++)
-            {
-                using var sw = new StreamWriter($"{_path}\\A_phi\\Answer\\Answer_Aphi_time={timeMesh[i]}.dat");
-                for (int j = 0;   j < A_phi[i].Size; j++)
-                    sw.WriteLine($"{A_phi[i][j]:E8}");
-                sw.Close();
-            }
-            for (int i = 0; i < timeMesh.Length; i++)
-            {
-                using var sw = new StreamWriter($"{_path}\\E_phi\\Answer\\Answer_Ephi_time={timeMesh[i]}.dat");
-                for (int j = 0;   j < E_phi2D[i].Size; j++)
-                    sw.WriteLine($"{E_phi2D[i][j]:E8}");
-                sw.Close();
-            }
-        }
-        else
-        {
-            using var sw = new StreamWriter($"{_path}\\A_phi\\Answer\\Answer.dat");
-            for (int j = 0; j < A_phi[0].Size; j++)
-                sw.WriteLine($"{A_phi[0][j]:E8}");
+            using var sw = new StreamWriter(path + $"/A_phi/Answer3D/Answer_{timeMesh[t]}.txt");
+            for (int i = 0; i < Solutions[t].Size; i++)
+                if (i == 16 || i == 24 || i == 26 || i == 27 || i == 29 || i == 37)
+                    sw.WriteLine($"{i} {Solutions[t][i]:E8}");
             sw.Close();
-#if RELEASE
-            using var sw1 = new StreamWriter($"{_path}\\E_phi\\Answer\\Answer.dat");
-            for (int j = 0; j < E_phi2D[0].Size; j++)
-                sw1.WriteLine($"{E_phi2D[0][j]:E8}");
-            sw1.Close();
-#endif
         }
     }
 
-    public void WriteDiscrepancy(string _path)
+    public void TestPoint(double x, double y, double z)
     {
-        if (Mesh2D is null) throw new ArgumentNullException();
-        if (Mesh2D.nodesR is null) throw new ArgumentNullException();
-        if (Mesh2D.nodesZ is null) throw new ArgumentNullException();
-        if (Solutions is null) throw new ArgumentNullException();
-        if (Discrepancy is null) throw new ArgumentNullException();
-        if (A_phi is null) throw new ArgumentNullException();
+        Point testPoint = new(x, y, z);
 
-
-        if (timeMesh is not null)
+        if (mesh.nodesX[0] <= x && x <= mesh.nodesX[^1] &&
+            mesh.nodesY[0] <= y && y <= mesh.nodesY[^1] &&
+            mesh.nodesZ[0] <= z && z <= mesh.nodesZ[^1])
         {
-            List<double> timeDisc = [];
-            for (int i = 0; i < timeMesh.Length; i++)
+            var absDiscX = 0.0D;
+            var absDiscY = 0.0D;
+            var absDiscZ = 0.0D;
+
+            var absDivX = 0.0D;
+            var absDivY = 0.0D;
+            var absDivZ = 0.0D;
+
+            var relDiscX = 0.0D;
+            var relDiscY = 0.0D;
+            var relDiscZ = 0.0D;
+
+            var relDivX = 0.0D;
+            var relDivY = 0.0D;
+            var relDivZ = 0.0D;
+
+            foreach (var elem in elemsArr)
             {
-                //if (i == 1)
-                //    continue;
-                using var sw_d = new StreamWriter($"{_path}\\A_phi\\Discrepancy\\Discrepancy_Aphi_time={timeMesh[i]}.dat");
+                int[] elem_local = [elem[0], elem[3], elem[8], elem[11],
+                                    elem[1], elem[2], elem[9], elem[10],
+                                    elem[4], elem[5], elem[6], elem[7]];
 
-                int NotNaNamount = 0;
-                double maxDisc = 0.0;
-                double avgDisc = 0.0;
+                var ribX = ribsArr[elem_local[0]];
+                var ribY = ribsArr[elem_local[4]];
+                var ribZ = ribsArr[elem_local[8]];
 
-                double sumU = 0.0D;
-                double sumD = 0.0D;
-
-                List<double> TheorAnswer = [];
-                foreach (var Z in Mesh2D.nodesZ)
-                    foreach (var R in Mesh2D.nodesR)
-                        TheorAnswer.Add(Function.U(R, Z, timeMesh[i]));
-
-                for (int j = 0; j < A_phi[i].Size; j++)
+                // if inside local elem.
+                if (ribX.a.X <= x && x <= ribX.b.X &&
+                    ribY.a.Y <= y && y <= ribY.b.Y &&
+                    ribZ.a.Z <= z && z <= ribZ.b.Z)
                 {
-                    double absDiff = Math.Abs(A_phi[i][j] - TheorAnswer[j]);
-                    double currDisc = Math.Abs((A_phi[i][j] - TheorAnswer[j]) / TheorAnswer[j]);
-                    
-                    if (Math.Abs(maxDisc) < Math.Abs(currDisc))
-                        maxDisc = currDisc;
+                    var eps = (x - ribX.a.X) / (ribX.b.X - ribX.a.X);
+                    var nu = (y - ribY.a.Y) / (ribY.b.Y - ribY.a.Y);
+                    var khi = (z - ribZ.a.Z) / (ribZ.b.Z - ribZ.a.Z);
 
-                    if (!double.IsNaN(currDisc) && currDisc > 1E-14)
-                    {
-                        avgDisc += currDisc;
-                        NotNaNamount++;
-                        sumU += absDiff * absDiff;
-                        sumD += TheorAnswer[j] * TheorAnswer[j];
-                    }
 
-                    //sumU += absDiff * absDiff;
-                    //sumD += A_phi[i][j] * A_phi[i][j];
+                    double[] q = [Solutions[0][elem_local[0]], Solutions[0][elem_local[1]], Solutions[0][elem_local[2]], Solutions[0][elem_local[3]],
+                                  Solutions[0][elem_local[4]], Solutions[0][elem_local[5]], Solutions[0][elem_local[6]], Solutions[0][elem_local[7]],
+                                  Solutions[0][elem_local[8]], Solutions[0][elem_local[9]], Solutions[0][elem_local[10]], Solutions[0][elem_local[11]]];
 
-                    sw_d.WriteLine($"{absDiff:E8} {currDisc:E8}");
+
+                    var ans = BasisFunctions3DVec.GetValue(eps, nu, khi, q);
+                    var theorValue = Function.A(x, y, z, 0.0D);
+
+                    Console.WriteLine($"FEM A  {ans.Item1:E15} {ans.Item2:E15} {ans.Item3:E15}");
+                    Console.WriteLine($"Theor  {theorValue.Item1:E15} {theorValue.Item2:E15} {theorValue.Item3:E15}");
+
+                    var currAbsDiscX = Math.Abs(ans.Item1 - theorValue.Item1);
+                    var currAbsDiscY = Math.Abs(ans.Item2 - theorValue.Item2);
+                    var currAbsDiscZ = Math.Abs(ans.Item3 - theorValue.Item3);
+
+                    var currRelDiscX = currAbsDiscX / Math.Abs(theorValue.Item1);
+                    var currRelDiscY = currAbsDiscY / Math.Abs(theorValue.Item2);
+                    var currRelDiscZ = currAbsDiscZ / Math.Abs(theorValue.Item3);
+
+                    Console.WriteLine($"CurrAD {currAbsDiscX:E15} {currAbsDiscY:E15} {currAbsDiscZ:E15}");
+                    Console.WriteLine($"CurrRD {currRelDiscX:E15} {currRelDiscY:E15} {currRelDiscZ:E15}\n");
+
+                    break;
                 }
-                avgDisc = Math.Sqrt(sumU) / Math.Sqrt(sumD);
-                sw_d.WriteLine($"Средняя невязка: {avgDisc:E15}");
-                sw_d.WriteLine($"Максимальная невязка: {maxDisc:E15}");
-                sw_d.WriteLine($"С: {avgDisc:E7}");
-                sw_d.WriteLine($"М: {maxDisc:E7}");
-                if (!double.IsNaN(avgDisc))
-                    timeDisc.Add(avgDisc);
-
-                if (timeMesh[i] == timeMesh.Last())
-                {
-                    double sum = 0.0D;
-                    foreach (var d in timeDisc)
-                        sum += d;
-                    sw_d.WriteLine($"\n\n\nСредняя погрешность по времени за {timeMesh.Length} слоя: {sum / timeDisc.Count:E15}\n{sum / timeDisc.Count:E8}");
-                }
-                sw_d.Close();
             }
         }
-        else
-        {
-            using var sw_d = new StreamWriter($"{_path}\\A_phi\\Discrepancy\\Discrepancy_Aphi.dat");
-
-            int NotNaNamount = 0;
-                double maxDisc = 0.0;
-                double avgDisc = 0.0;
-
-                double sumU = 0.0D;
-                double sumD = 0.0D;
-
-                List<double> TheorAnswer = [];
-                foreach (var Z in Mesh2D.nodesZ)
-                    foreach (var R in Mesh2D.nodesR)
-                        TheorAnswer.Add(Function.U(R, Z, 0.0D));
-
-                for (int j = 0; j < A_phi[0].Size; j++)
-                {
-                    double absDiff = Math.Abs(A_phi[0][j] - TheorAnswer[j]);
-                    double currDisc = Math.Abs((A_phi[0][j] - TheorAnswer[j]) / TheorAnswer[j]);
-                    
-                    if (Math.Abs(maxDisc) < Math.Abs(currDisc))
-                        maxDisc = currDisc;
-
-                    if (!double.IsNaN(currDisc) && currDisc > 1E-14)
-                    {
-                        avgDisc += currDisc;
-                        NotNaNamount++;
-                        sumU += absDiff * absDiff;
-                        sumD += TheorAnswer[j] * TheorAnswer[j];
-                    }
-
-                    //sumU += absDiff * absDiff;
-                    //sumD += A_phi[i][j] * A_phi[i][j];
-
-                    sw_d.WriteLine($"{absDiff:E8} {currDisc:E8}");
-                }
-                avgDisc = Math.Sqrt(sumU) / Math.Sqrt(sumD);
-                sw_d.WriteLine($"Средняя невязка: {avgDisc:E15}");
-                sw_d.WriteLine($"Максимальная невязка: {maxDisc:E15}");
-                sw_d.WriteLine($"С: {avgDisc:E7}");
-                sw_d.WriteLine($"М: {maxDisc:E7}");
-                sw_d.Close();
-        }
     }
 
-    public void GenerateVectorEphi()
+    public void TestOutput(string path)
     {
-        if (timeMesh is null) throw new NullReferenceException("timeMesh is null");
-        
-        E_phi2D = new GlobalVector[A_phi.Length];
-        
-        for (int i = 0; i < E_phi2D.Length; i++)
+        using var sw = new StreamWriter(path + "/A_phi/Answer3D/Answer_Test.txt");
+
+        var absDiscX = 0.0D;
+        var absDiscY = 0.0D;
+        var absDiscZ = 0.0D;
+
+        var absDivX = 0.0D;
+        var absDivY = 0.0D;
+        var absDivZ = 0.0D;
+
+        var relDiscX = 0.0D;
+        var relDiscY = 0.0D;
+        var relDiscZ = 0.0D;
+
+        var relDivX = 0.0D;
+        var relDivY = 0.0D;
+        var relDivZ = 0.0D;
+
+        var squareDiffX = 0.0D;
+        var squareDiffY = 0.0D;
+        var squareDiffZ = 0.0D;
+
+        int iter = 0;
+
+        foreach (var elem in elemsArr)
         {
-            if (i == 0)
-                E_phi2D[i] = (-1.0 / (timeMesh[i + 1] - timeMesh[i])) * (A_phi[i + 1] - A_phi[i]);
-            else if (i == 1)
-                E_phi2D[i] = (-1.0 / (timeMesh[i + 1] - timeMesh[i - 1])) * (A_phi[i + 1] - A_phi[i - 1]);
-            else
-            {
-                double ti = timeMesh[i];
-                double ti_1 = timeMesh[i - 1];
-                double ti_2 = timeMesh[i - 2];
+            int[] elem_local = [elem[0], elem[3], elem[8], elem[11],
+                                elem[1], elem[2], elem[9], elem[10],
+                                elem[4], elem[5], elem[6], elem[7]];
 
-                double dt = ti - ti_2;
-                double dt0 = ti - ti_1;
-                double dt1 = ti_1 - ti_2;
+            var x = 0.5D * (ribsArr[elem_local[0]].a.X + ribsArr[elem_local[0]].b.X);
+            var y = 0.5D * (ribsArr[elem_local[4]].a.Y + ribsArr[elem_local[4]].b.Y);
+            var z = 0.5D * (ribsArr[elem_local[8]].a.Z + ribsArr[elem_local[8]].b.Z);
 
-                E_phi2D[i] = -1.0D * (dt0 / (dt1 * dt) * A_phi[i - 2] - dt / (dt1 * dt0) * A_phi[i - 1] + 
-                (dt + dt0) / (dt * dt0) * A_phi[i]);
-            }
+            sw.WriteLine($"Points {x:E15} {y:E15} {z:E15}");
+
+            var eps = (x - ribsArr[elem_local[0]].a.X) / (ribsArr[elem_local[0]].b.X - ribsArr[elem_local[0]].a.X);
+            var nu = (y - ribsArr[elem_local[4]].a.Y) / (ribsArr[elem_local[4]].b.Y - ribsArr[elem_local[4]].a.Y);
+            var khi = (z - ribsArr[elem_local[8]].a.Z) / (ribsArr[elem_local[8]].b.Z - ribsArr[elem_local[8]].a.Z);
+
+            double[] q = [Solutions[0][elem_local[0]], Solutions[0][elem_local[1]], Solutions[0][elem_local[2]], Solutions[0][elem_local[3]],
+                          Solutions[0][elem_local[4]], Solutions[0][elem_local[5]], Solutions[0][elem_local[6]], Solutions[0][elem_local[7]],
+                          Solutions[0][elem_local[8]], Solutions[0][elem_local[9]], Solutions[0][elem_local[10]], Solutions[0][elem_local[11]]];
+
+            var ans = BasisFunctions3DVec.GetValue(eps, nu, khi, q);
+            var theorValue = Function.A(x, y, z, 0.0D);
+
+            sw.WriteLine($"FEM A  {ans.Item1:E15} {ans.Item2:E15} {ans.Item3:E15}");
+            sw.WriteLine($"Theor  {theorValue.Item1:E15} {theorValue.Item2:E15} {theorValue.Item3:E15}");
+
+            var currAbsDiscX = Math.Abs(ans.Item1 - theorValue.Item1);
+            var currAbsDiscY = Math.Abs(ans.Item2 - theorValue.Item2);
+            var currAbsDiscZ = Math.Abs(ans.Item3 - theorValue.Item3);
+
+            squareDiffX += currAbsDiscX * currAbsDiscX;
+            squareDiffY += currAbsDiscY * currAbsDiscY;
+            squareDiffZ += currAbsDiscZ * currAbsDiscZ;
+
+            var currRelDiscX = currAbsDiscX / Math.Abs(theorValue.Item1);
+            var currRelDiscY = currAbsDiscY / Math.Abs(theorValue.Item2);
+            var currRelDiscZ = currAbsDiscZ / Math.Abs(theorValue.Item3);
+
+            sw.WriteLine($"CurrAD {currAbsDiscX:E15} {currAbsDiscY:E15} {currAbsDiscZ:E15}");
+            sw.WriteLine($"CurrRD {currRelDiscX:E15} {currRelDiscY:E15} {currRelDiscZ:E15}\n");
+
+            absDiscX += currAbsDiscX;
+            absDiscY += currAbsDiscY;
+            absDiscZ += currAbsDiscZ;
+
+            absDivX += theorValue.Item1;
+            absDivY += theorValue.Item2;
+            absDivZ += theorValue.Item3;
+
+            relDiscX += currRelDiscX * currRelDiscX;
+            relDiscY += currRelDiscY * currRelDiscY;
+            relDiscZ += currRelDiscZ * currRelDiscZ;
+
+            relDivX += theorValue.Item1 * theorValue.Item1;
+            relDivY += theorValue.Item2 * theorValue.Item2;
+            relDivZ += theorValue.Item3 * theorValue.Item3;
+
+            iter++;
         }
-        
-        /*
-        for (int i = 0; i < E_phi2D.Length; i++)
-        {
-            if (i == 0)
-                E_phi2D[i] = (-1.0 / (timeMesh[i + 1] - timeMesh[i])) * (A_phi[i + 1] - A_phi[i]);
-            else if (i == E_phi2D.Length - 1)
-                E_phi2D[i] = (-1.0 / (timeMesh[i] - timeMesh[i - 1])) * (A_phi[i] - A_phi[i - 1]);
-            else
-                E_phi2D[i] = (-1.0 / (timeMesh[i + 1] - timeMesh[i - 1])) * (A_phi[i + 1] - A_phi[i - 1]);
-        }
-        */
-    }
-
-    public List<int> GetE_phi(double r, double z)
-    {
-        if (Mesh2D is null) throw new ArgumentNullException();
-        if (Mesh2D.nodesR is null) throw new ArgumentNullException();
-        if (Mesh2D.nodesZ is null) throw new ArgumentNullException();
-        if (elemsArr is null) throw new ArgumentNullException();
-
-        int i;
-        for (i = 0; i < Mesh2D.nodesR.Count - 1; i++)
-            if (Mesh2D.nodesR[i] <= r && r <= Mesh2D.nodesR[i + 1])
-                break;
-        int j;
-        for (j = 0; j < Mesh2D.nodesZ.Count - 1; j++)
-            if (Mesh2D.nodesZ[j] <= z && z <= Mesh2D.nodesZ[j + 1])
-                break;
-
-        return elemsArr[j * (Mesh2D.nodesR.Count - 1) + i];
+        sw.WriteLine($"Avg disc: {absDiscX / iter:E15} {absDiscY / iter:E15} {absDiscZ / iter:E15}");
+        sw.WriteLine($"Rel disc: {Math.Sqrt(relDiscX / relDivX):E15} {Math.Sqrt(relDiscY / relDivY):E15} {Math.Sqrt(relDiscZ / relDivZ):E15}");
+        sw.WriteLine($"SKO: {Math.Sqrt(squareDiffX / elemsArr.Length):E15} {Math.Sqrt(squareDiffY / elemsArr.Length):E15} {Math.Sqrt(squareDiffZ / elemsArr.Length):E15}");
+        sw.Close();
     }
 }

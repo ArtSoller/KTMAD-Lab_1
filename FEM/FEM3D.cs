@@ -10,6 +10,7 @@ using System.Diagnostics;
 using Functions;
 using System.ComponentModel.DataAnnotations;
 using System.Timers;
+using System;
 
 public class FEM3D : FEM
 {
@@ -29,24 +30,6 @@ public class FEM3D : FEM
 
     // Maybe private?
     public List<Layer> Layers;
-
-    public FEM3D(FEM2D fem2d)
-    {
-        Ax_3D = [];
-        Ay_3D = [];
-        Az_3D = [];
-        Ex_3D = [];
-        Ey_3D = [];
-        Ez_3D = [];
-        Layers = [];
-        mesh = new Mesh3Dim
-        {
-            nodesX = [],
-            nodesY = [],
-            nodesZ = []
-        };
-        equationType = fem2d.equationType;
-    }
 
     public FEM3D()
     {
@@ -69,9 +52,9 @@ public class FEM3D : FEM
     {
         if (mesh == null) throw new ArgumentNullException("Mesh is null");
         
-        double hx = 2.0D;
-        double hy = 2.0D;
-        double hz = 2.0D;
+        double hx = 1.0D;
+        double hy = 1.0D;
+        double hz = 1.0D;
         
         mesh.nodesX = [];
         mesh.nodesY = [];
@@ -95,156 +78,22 @@ public class FEM3D : FEM
             mesh.nodesZ.Add(i * stepz);
         }
 
-        ///mesh.nodesX = [0.0D, 1.0D, 2.0D];
-        ///mesh.nodesY = [0.0D, 1.0D, 2.0D];
-        ///mesh.nodesZ = [0.0D, 1.0D, 2.0D];
         timeMesh = [1.0D];
     }
 
-    public void ConstructMesh(FEM2D fem2d)
-    {   
-        if (fem2d.Mesh2D.nodesR is null) throw new ArgumentNullException("null object");
-        if (mesh is null) throw new ArgumentNullException("null object");
-        if (mesh.nodesX is null) throw new ArgumentNullException("null object");
-        if (mesh.nodesY is null) throw new ArgumentNullException("null object");
+    
 
-        mesh.nodesX = fem2d.Mesh2D.nodesR.Where(r => r < fem2d.Mesh2D.nodesR.Last() / Math.Sqrt(2.0D)).ToList();
-        mesh.nodesY = fem2d.Mesh2D.nodesR.Where(r => r < fem2d.Mesh2D.nodesR.Last() / Math.Sqrt(2.0D)).ToList();
-        
-        mesh.nodesX.Add(fem2d.Mesh2D.nodesR.Last() / Math.Sqrt(2.0D));
-        mesh.nodesY.Add(fem2d.Mesh2D.nodesR.Last() / Math.Sqrt(2.0D));
-        
-        int amount = 2 * mesh.nodesX.Count - 2;
-
-        for (int i = 0; i < amount; i += 2)
-        {
-            mesh.nodesX.Insert(0, -1.0D * mesh.nodesX[i]);
-            mesh.nodesY.Insert(0, -1.0D * mesh.nodesY[i]);
-        }
-
-        mesh.nodesX.Insert(0, -1.0D * mesh.nodesX[^1]);
-        mesh.nodesY.Insert(0, -1.0D * mesh.nodesY[^1]);
-
-        mesh.mu0 = fem2d.mu0;
-        mesh.sigma = fem2d.sigma;
-
-        mesh.nodesZ = fem2d.Mesh2D.nodesZ;
-        timeMesh = fem2d.timeMesh;
-    }
-
-    public void ConvertResultTo3Dim(FEM2D fem2d)
+    public void GenerateArrays(string MeshInfo, string BordersInfo)
     {
-        Task TaskGenerationAxyz = Task.Run(() => GenerateAxyz(fem2d));
-        Task TaskGenerationExyz = Task.Run(() => GenerateExyz(fem2d));
-        TaskGenerationAxyz.Wait();
-        TaskGenerationExyz.Wait();
-    }
-
-    public void GenerateAxyz(FEM2D fem2d)
-    {
-        if (timeMesh is null) throw new ArgumentNullException();
-        if (mesh is null) throw new ArgumentNullException();
-        if (mesh.nodesX is null) throw new ArgumentNullException();
-        if (mesh.nodesY is null) throw new ArgumentNullException();
-        if (mesh.nodesZ is null) throw new ArgumentNullException();
-        if (fem2d.pointsArr is null) throw new ArgumentNullException();
-
-        int i = 0;
-        
-        foreach (var t in timeMesh)
-        {
-            int j = 0;
-            Ax_3D.Add(new GlobalVector(mesh.NodesAmountTotal));
-            Ay_3D.Add(new GlobalVector(mesh.NodesAmountTotal));
-            Az_3D.Add(new GlobalVector(mesh.NodesAmountTotal));
-            foreach (var Z in mesh.nodesZ)
-            {
-                foreach (var Y in mesh.nodesY)
-                {
-                    foreach (var X in mesh.nodesX)
-                    {
-                        var elem = fem2d.GetE_phi(Math.Sqrt(X * X + Y * Y), Z);
-
-                        Ax_3D[i][j] = -1.0D * (Y / Math.Sqrt(X * X + Y * Y)) * 
-                            BasisFunctions2D.GetValue(
-                                fem2d.A_phi[i][elem[0]], fem2d.A_phi[i][elem[1]],
-                                fem2d.A_phi[i][elem[2]], fem2d.A_phi[i][elem[3]],
-                                fem2d.pointsArr[elem[0]].R, fem2d.pointsArr[elem[1]].R,
-                                fem2d.pointsArr[elem[0]].Z, fem2d.pointsArr[elem[3]].Z, 
-                                Math.Sqrt(X * X + Y * Y), Z);
-                        
-                        Ay_3D[i][j] = X / Math.Sqrt(X * X + Y * Y) * 
-                            BasisFunctions2D.GetValue(
-                                fem2d.A_phi[i][elem[0]], fem2d.A_phi[i][elem[1]],
-                                fem2d.A_phi[i][elem[2]], fem2d.A_phi[i][elem[3]],
-                                fem2d.pointsArr[elem[0]].R, fem2d.pointsArr[elem[1]].R,
-                                fem2d.pointsArr[elem[0]].Z, fem2d.pointsArr[elem[3]].Z, 
-                                Math.Sqrt(X * X + Y * Y), Z);
-                        
-                        j++;
-                    }
-                }
-            }
-            i++;
-        }
-    }
-
-    private void GenerateExyz(FEM2D fem2d)
-    {
-        if (timeMesh is null) throw new ArgumentNullException();
-        if (mesh is null) throw new ArgumentNullException();
-        if (mesh.nodesX is null) throw new ArgumentNullException();
-        if (mesh.nodesY is null) throw new ArgumentNullException();
-        if (mesh.nodesZ is null) throw new ArgumentNullException();
-        if (fem2d.pointsArr is null) throw new ArgumentNullException();
-
-        int i = 0;
-        
-        foreach (var t in timeMesh)
-        {
-            int j = 0;
-            Ex_3D.Add(new GlobalVector(mesh.NodesAmountTotal));
-            Ey_3D.Add(new GlobalVector(mesh.NodesAmountTotal));
-            Ez_3D.Add(new GlobalVector(mesh.NodesAmountTotal));
-            foreach (var Z in mesh.nodesZ)
-            {
-                foreach (var Y in mesh.nodesY)
-                {
-                    foreach (var X in mesh.nodesX)
-                    {
-                        var elem = fem2d.GetE_phi(Math.Sqrt(X * X + Y * Y), Z);
-
-                        Ex_3D[i][j] = -1.0D * (Y / Math.Sqrt(X * X + Y * Y)) * 
-                            BasisFunctions2D.GetValue(
-                                fem2d.E_phi2D[i][elem[0]], fem2d.E_phi2D[i][elem[1]],
-                                fem2d.E_phi2D[i][elem[2]], fem2d.E_phi2D[i][elem[3]],
-                                fem2d.pointsArr[elem[0]].R, fem2d.pointsArr[elem[1]].R,
-                                fem2d.pointsArr[elem[0]].Z, fem2d.pointsArr[elem[3]].Z, 
-                                Math.Sqrt(X * X + Y * Y), Z);
-                        
-                        Ey_3D[i][j] = X / Math.Sqrt(X * X + Y * Y) * 
-                            BasisFunctions2D.GetValue(
-                                fem2d.E_phi2D[i][elem[0]], fem2d.E_phi2D[i][elem[1]],
-                                fem2d.E_phi2D[i][elem[2]], fem2d.E_phi2D[i][elem[3]],
-                                fem2d.pointsArr[elem[0]].R, fem2d.pointsArr[elem[1]].R,
-                                fem2d.pointsArr[elem[0]].Z, fem2d.pointsArr[elem[3]].Z, 
-                                Math.Sqrt(X * X + Y * Y), Z);
-                        
-                        j++;
-                    }
-                }
-            }
-            i++;
-        }
-    }
-
-    public void GenerateArrays()
-    {
+        timeMesh = [1.0D];
         if (mesh is null) throw new ArgumentNullException("mesh is null!");
+        MeshReader.ReadMesh(MeshInfo, BordersInfo, ref mesh);
+        MeshGenerator.GenerateMesh(ref mesh);
         pointsArr = MeshGenerator.GenerateListOfPoints(mesh);
         ribsArr = MeshGenerator.GenerateListOfRibs(mesh, pointsArr);
         elemsArr = MeshGenerator.GenerateListOfElems(mesh, ribsArr);
         bordersArr = MeshGenerator.GenerateListOfBorders(mesh);
+        Console.WriteLine();
         //MeshGenerator.SelectRibs(ref ribsArr, ref elemsArr);
     }
 
@@ -367,6 +216,78 @@ public class FEM3D : FEM
                 if (i == 16 || i == 24 || i == 26 || i == 27 || i == 29 || i == 37)
                     sw.WriteLine($"{i} {Solutions[t][i]:E8}");
             sw.Close();
+        }
+    }
+
+    public void TestPoint(double x, double y, double z)
+    {
+        Point testPoint = new (x, y, z);
+        
+        if (mesh.nodesX[0] <= x && x <= mesh.nodesX[^1] && 
+            mesh.nodesY[0] <= y && y <= mesh.nodesY[^1] && 
+            mesh.nodesZ[0] <= z && z <= mesh.nodesZ[^1])
+        {
+            var absDiscX = 0.0D;
+            var absDiscY = 0.0D;
+            var absDiscZ = 0.0D;
+
+            var absDivX = 0.0D;
+            var absDivY = 0.0D;
+            var absDivZ = 0.0D;
+
+            var relDiscX = 0.0D;
+            var relDiscY = 0.0D;
+            var relDiscZ = 0.0D;
+
+            var relDivX = 0.0D;
+            var relDivY = 0.0D;
+            var relDivZ = 0.0D;
+
+            foreach (var elem in elemsArr)
+            {
+                int[] elem_local = [elem[0], elem[3], elem[8], elem[11],
+                                    elem[1], elem[2], elem[9], elem[10],
+                                    elem[4], elem[5], elem[6], elem[7]];
+                
+                var ribX = ribsArr[elem_local[0]];
+                var ribY = ribsArr[elem_local[4]];
+                var ribZ = ribsArr[elem_local[8]];
+                
+                // if inside local elem.
+                if (ribX.a.X <= x && x <= ribX.b.X &&
+                    ribY.a.Y <= y && y <= ribY.b.Y &&
+                    ribZ.a.Z <= z && z <= ribZ.b.Z)
+                {       
+                    var eps = (x - ribX.a.X) / (ribX.b.X - ribX.a.X);
+                    var nu = (y - ribY.a.Y) / (ribY.b.Y - ribY.a.Y);
+                    var khi = (z - ribZ.a.Z) / (ribZ.b.Z - ribZ.a.Z);
+
+
+                    double[] q = [Solutions[0][elem_local[0]], Solutions[0][elem_local[1]], Solutions[0][elem_local[2]], Solutions[0][elem_local[3]],
+                                  Solutions[0][elem_local[4]], Solutions[0][elem_local[5]], Solutions[0][elem_local[6]], Solutions[0][elem_local[7]],
+                                  Solutions[0][elem_local[8]], Solutions[0][elem_local[9]], Solutions[0][elem_local[10]], Solutions[0][elem_local[11]]];
+
+
+                    var ans = BasisFunctions3DVec.GetValue(eps, nu, khi, q);
+                    var theorValue = Function.A(x, y, z, 0.0D);
+
+                    Console.WriteLine($"FEM A  {ans.Item1:E15} {ans.Item2:E15} {ans.Item3:E15}");
+                    Console.WriteLine($"Theor  {theorValue.Item1:E15} {theorValue.Item2:E15} {theorValue.Item3:E15}");
+                    
+                    var currAbsDiscX = Math.Abs(ans.Item1 - theorValue.Item1);
+                    var currAbsDiscY = Math.Abs(ans.Item2 - theorValue.Item2);
+                    var currAbsDiscZ = Math.Abs(ans.Item3 - theorValue.Item3);
+
+                    var currRelDiscX = currAbsDiscX / Math.Abs(theorValue.Item1);
+                    var currRelDiscY = currAbsDiscY / Math.Abs(theorValue.Item2);
+                    var currRelDiscZ = currAbsDiscZ / Math.Abs(theorValue.Item3);
+
+                    Console.WriteLine($"CurrAD {currAbsDiscX:E15} {currAbsDiscY:E15} {currAbsDiscZ:E15}");
+                    Console.WriteLine($"CurrRD {currRelDiscX:E15} {currRelDiscY:E15} {currRelDiscZ:E15}\n");
+
+                    break;
+                }
+            }
         }
     }
 

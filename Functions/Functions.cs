@@ -6,19 +6,15 @@ namespace Functions;
 public static class Function
 {
     // Функция правой части.
-    public static double F(double r, double z, double t) => -8.0D * r - 6.0D * z + z * z * z / (r * r);
-
-    public static (double, double, double) F(double x, double y, double z, double t) => (0.0D,
-                                                                                         0.0D,
-                                                                                         0.0D);
+    public static (double, double, double) F(double x, double y, double z, double t) => (y*y*z*z - 2*(y*y+z*z),
+                                                                                         x*x*z*z - 2 * (x * x + z * z),
+                                                                                         x*x*y*y - 2 * (x * x + y * y));
 
 
     // Тестируемая функция.
-    public static double U(double r, double z, double t) => r * r * r + z * z * z;
-
-    public static (double, double, double) A(double x, double y, double z, double t) => (Math.Exp(y),
-                                                                                         0.0D,
-                                                                                         0.0D);
+    public static (double, double, double) A(double x, double y, double z, double t) => (y * y * z * z,
+                                                                                         x * x * z * z,
+                                                                                         x * x * y * y);
 
 /*
                     3

@@ -11,7 +11,6 @@ public static class Generator
         m._al = new double[m._jg.Count];
         m._au = new double[m._jg.Count];
 
-        using var sw = new StreamWriter("C:\\Users\\USER\\Desktop\\fgnf.txt");
         for (int i = 0; i < arrEl.Length; i++)
         {
             List<int> currElem = [arrEl[i][0], arrEl[i][3], arrEl[i][8], arrEl[i][11],
@@ -25,11 +24,11 @@ public static class Generator
 
             foreach (var rib in currElem)
             {
-                if (rib != -1 && hx == 0 && arrRibs[rib].GetNormal().Item1 != 0)
+                if (hx == 0 && arrRibs[rib].GetNormal().Item1 != 0)
                     hx = arrRibs[rib].Length;
-                if (rib != -1 && hy == 0 && arrRibs[rib].GetNormal().Item2 != 0)
+                if (hy == 0 && arrRibs[rib].GetNormal().Item2 != 0)
                     hy = arrRibs[rib].Length;
-                if (rib != -1 && hz == 0 && arrRibs[rib].GetNormal().Item3 != 0)
+                if (hz == 0 && arrRibs[rib].GetNormal().Item3 != 0)
                     hz = arrRibs[rib].Length;
             }
 
@@ -207,78 +206,9 @@ public static class Generator
         m._al = new double[m._jg.Count];
         m._au = new double[m._jg.Count];
 
-    }
+    }   
 
-    public static void FillMatrix(ref GlobalMatrix m, ArrayOfPoints arrPt, ArrayOfElems arrEl, TypeOfMatrixM typeOfMatrixM)
-    {    
-        m._al = new double[m._jg.Count];
-        m._au = new double[m._jg.Count];
-
-        for (int i = 0; i < arrEl.Length; i++)
-            Add(new LocalMatrixNum(arrEl[i], arrPt, typeOfMatrixM, arrEl.mui[i], arrEl.sigmai[i]), ref m, arrEl[i]);
-            //Add(new LocalMatrixNum(arrEl[i], arrPt, typeOfMatrixM, arrEl.mui[i], arrEl.sigmai[i]), ref m, arrEl[i]);
-/*
-        for (int ii = 0; ii < 9; ii++)
-        {
-            for (int jj = 0; jj < 9; jj++)
-            {
-                Console.Write($"{m[ii, jj]:E2} ");
-            }
-            Console.WriteLine();
-        }
-        Console.WriteLine();
-*/
-        //ConsiderBoundaryConditions(ref m, arrBd);
-    }
-
-    private static void Add(LocalMatrixNum lm, ref GlobalMatrix gm, List<int> elem)
-    {
-        if (gm._diag is null) throw new Exception("_diag isn't initialized");
-        if (gm._ig is null) throw new Exception("_ig isn't initialized");
-        if (gm._au is null) throw new Exception("_au isn't initialized");
-        if (gm._al is null) throw new Exception("_au isn't initialized");
-        
-        
-        int ii = 0;
-        foreach (var i in elem)
-        {
-            if (i != -1)
-            {
-                int jj = 0;
-                foreach (var j in elem)
-                {
-                    if (j != -1)
-                    {
-                        int ind = 0;
-                        double val = 0.0D;
-                        switch(i - j)
-                        {
-                            case 0:
-                                val = lm[ii, jj];
-                                gm._diag[i] += lm[ii, jj];
-                                break;
-                            case < 0:
-                                ind = gm._ig[j];
-                                for (; ind <= gm._ig[j + 1] - 1; ind++)
-                                    if (gm._jg[ind] == i) break;
-                                val = lm[ii, jj];
-                                gm._au[ind] += lm[ii, jj];
-                                break;
-                            case > 0:
-                                ind = gm._ig[i];
-                                for (; ind <= gm._ig[i + 1] - 1; ind++)
-                                    if (gm._jg[ind] == j) break;
-                                val = lm[ii, jj];
-                                gm._al[ind] += lm[ii, jj];
-                                break;
-                        }
-                    }
-                    jj++;
-                }
-            }
-            ii++;
-        }
-    }
+    
 
     private static void Add(LocalMatrixG3D lm, ref GlobalMatrix gm, List<int> elem)
     {
@@ -409,24 +339,7 @@ public static class Generator
 
             }
         }
-    }
-
-    public static void FillVector(ref GlobalVector v, ArrayOfPoints arrPt, ArrayOfElems arrEl, double t)
-    {
-        for (int i = 0; i < arrEl.Length; i++)
-        {
-            Add(new LocalVector(arrEl[i], arrPt, t), ref v, arrEl[i]);
-        }
-        //ConsiderBoundaryConditions(ref v, arrPt, arrBd, t);
-    }
-
-    private static void Add(LocalVector lv, ref GlobalVector gv, List<int> elems)
-    {
-        for (int i = 0; i < elems.Count; i++)
-        {
-            gv[elems[i]] += lv[i];
-        }
-    }
+    }    
 
     public static void ConsiderBoundaryConditions(ref GlobalMatrix gm, ref GlobalVector gv, ArrayOfPoints arrp, ArrayOfBorders arrBd, double t)
     {

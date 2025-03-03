@@ -10,14 +10,13 @@ public static class MeshGenerator
 
     private static readonly string _bordersPath = Path.GetFullPath("../../../../Data/Subtotals/Borders.dat");
 
-
-    public static void GenerateMesh(ref Mesh2Dim mesh)
+    public static void GenerateMesh(ref Mesh3Dim mesh)
     {
         int currentPosition = 0;
-        double[] kek = mesh.infoAboutR.Split().Select(double.Parse).ToArray();
-        for (int i = 0; i < mesh.NodesRWithoutFragmentation.Length - 1; i++)
+        double[] kek = mesh.infoAboutX.Split().Select(double.Parse).ToArray();
+        for (int i = 0; i < mesh.NodesXWithoutFragmentation.Length - 1; i++)
         {
-            double h = mesh.nodesR[1 + currentPosition] - mesh.nodesR[currentPosition];
+            double h = mesh.nodesX[1 + currentPosition] - mesh.nodesX[currentPosition];
             double denominator = 0.0;
 
             int negr = Convert.ToInt32(kek[2 * i]);
@@ -26,15 +25,36 @@ public static class MeshGenerator
 
             double x0 = h / denominator;
 
-            for(int j = 0; j < negr - 1; j++)
+            for (int j = 0; j < negr - 1; j++)
             {
-                mesh.nodesR.Insert(currentPosition + 1, mesh.nodesR[currentPosition] + x0 * Math.Pow(kek[2 * i + 1], j));
+                mesh.nodesX.Insert(currentPosition + 1, mesh.nodesX[currentPosition] + x0 * Math.Pow(kek[2 * i + 1], j));
                 currentPosition++;
             }
             currentPosition++;
-            mesh.nodesR_Refs[i + 1] = currentPosition;
+            mesh.nodesXRefs[i + 1] = currentPosition;
         }
-        
+
+        currentPosition = 0;
+        kek = mesh.infoAboutY.Split().Select(double.Parse).ToArray();
+        for (int i = 0; i < mesh.NodesYWithoutFragmentation.Length - 1; i++)
+        {
+            double h = mesh.nodesY[1 + currentPosition] - mesh.nodesY[currentPosition];
+            double denominator = 0.0;
+
+            int negr = Convert.ToInt32(kek[2 * i]);
+            for (int j = 0; j < negr; j++)
+                denominator += Math.Pow(kek[2 * i + 1], j);
+            double x0 = h / denominator;
+
+            for (int j = 0; j < negr - 1; j++)
+            {
+                mesh.nodesY.Insert(currentPosition + 1, mesh.nodesY[currentPosition] + x0 * Math.Pow(kek[2 * i + 1], j));
+                currentPosition++;
+            }
+            currentPosition++;
+            mesh.nodesYRefs[i + 1] = currentPosition;
+        }
+
         currentPosition = 0;
         kek = mesh.infoAboutZ.Split().Select(double.Parse).ToArray();
         for (int i = 0; i < mesh.NodesZWithoutFragmentation.Length - 1; i++)
@@ -47,13 +67,60 @@ public static class MeshGenerator
                 denominator += Math.Pow(kek[2 * i + 1], j);
             double x0 = h / denominator;
 
-            for(int j = 0; j < negr - 1; j++)
+            for (int j = 0; j < negr - 1; j++)
             {
                 mesh.nodesZ.Insert(currentPosition + 1, mesh.nodesZ[currentPosition] + x0 * Math.Pow(kek[2 * i + 1], j));
                 currentPosition++;
             }
             currentPosition++;
             mesh.nodesZRefs[i + 1] = currentPosition;
+        }
+        //RemakeBorders(ref mesh);
+    }
+
+    public static void GenerateMesh(ref Mesh2Dim mesh)
+    {
+        int currentPosition = 0;
+        double[] kek = mesh.infoAboutX.Split().Select(double.Parse).ToArray();
+        for (int i = 0; i < mesh.NodesXWithoutFragmentation.Length - 1; i++)
+        {
+            double h = mesh.nodesX[1 + currentPosition] - mesh.nodesX[currentPosition];
+            double denominator = 0.0;
+
+            int negr = Convert.ToInt32(kek[2 * i]);
+            for (int j = 0; j < negr; j++)
+                denominator += Math.Pow(kek[2 * i + 1], j);
+
+            double x0 = h / denominator;
+
+            for(int j = 0; j < negr - 1; j++)
+            {
+                mesh.nodesX.Insert(currentPosition + 1, mesh.nodesX[currentPosition] + x0 * Math.Pow(kek[2 * i + 1], j));
+                currentPosition++;
+            }
+            currentPosition++;
+            mesh.nodesXRefs[i + 1] = currentPosition;
+        }
+        
+        currentPosition = 0;
+        kek = mesh.infoAboutY.Split().Select(double.Parse).ToArray();
+        for (int i = 0; i < mesh.NodesYWithoutFragmentation.Length - 1; i++)
+        {
+            double h = mesh.nodesY[1 + currentPosition] - mesh.nodesY[currentPosition];
+            double denominator = 0.0;
+
+            int negr = Convert.ToInt32(kek[2 * i]);
+            for (int j = 0; j < negr; j++)
+                denominator += Math.Pow(kek[2 * i + 1], j);
+            double x0 = h / denominator;
+
+            for(int j = 0; j < negr - 1; j++)
+            {
+                mesh.nodesY.Insert(currentPosition + 1, mesh.nodesY[currentPosition] + x0 * Math.Pow(kek[2 * i + 1], j));
+                currentPosition++;
+            }
+            currentPosition++;
+            mesh.nodesYRefs[i + 1] = currentPosition;
         }
         RemakeBorders(ref mesh);
     }
@@ -68,11 +135,11 @@ public static class MeshGenerator
                 {
                     case 2:
                     case 3:
-                        border[i] = mesh.nodesR_Refs[border[i]];
+                        border[i] = mesh.nodesXRefs[border[i]];
                         break;
                     case 4:
                     case 5:
-                        border[i] = mesh.nodesZRefs[border[i]];
+                        border[i] = mesh.nodesYRefs[border[i]];
                         break;
                 }
             }
@@ -92,18 +159,18 @@ public static class MeshGenerator
             }
     }
 
-    private static Point SetPointType(Mesh2Dim mesh, Point pnt)
+    private static Point SetPointType(Mesh2Dim mesh2D, Point pnt)
     {
-        for (int i = 0; i < mesh.Elems.Count; i++)
+        for (int i = 0; i < mesh2D.Elems.Count; i++)
         {   
-            if (mesh.NodesRWithoutFragmentation[mesh.Elems[i][1]] <= pnt.R && pnt.R <= mesh.NodesRWithoutFragmentation[mesh.Elems[i][2]] &&
-                mesh.NodesZWithoutFragmentation[mesh.Elems[i][3]] <= pnt.Z && pnt.Z <= mesh.NodesZWithoutFragmentation[mesh.Elems[i][4]])
+            if (mesh2D.NodesXWithoutFragmentation[mesh2D.Elems[i][1]] <= pnt.X && pnt.X <= mesh2D.NodesXWithoutFragmentation[mesh2D.Elems[i][2]] &&
+                mesh2D.NodesYWithoutFragmentation[mesh2D.Elems[i][3]] <= pnt.Y && pnt.Y <= mesh2D.NodesYWithoutFragmentation[mesh2D.Elems[i][4]])
             {
                 int minValue = 4;
-                foreach (var arr in mesh.borders)
+                foreach (var arr in mesh2D.borders)
                 {
-                    if (mesh.nodesR[arr[2]] <= pnt.R && pnt.R <= mesh.nodesR[arr[3]] &&
-                        mesh.nodesZ[arr[4]] <= pnt.Z && pnt.Z <= mesh.nodesZ[arr[5]] &&
+                    if (mesh2D.nodesR[arr[2]] <= pnt.X && pnt.X <= mesh2D.nodesR[arr[3]] &&
+                        mesh2D.nodesZ[arr[4]] <= pnt.Y && pnt.Y <= mesh2D.nodesZ[arr[5]] &&
                         arr[0] < minValue)
                         {
                             minValue = arr[0];
@@ -124,18 +191,45 @@ public static class MeshGenerator
         return pnt;
     }
 
-    public static void GenerateListOfElems(ref Mesh2Dim mesh, ArrayOfPoints arrPt)
+    public static void GenerateListOfElems(ref Mesh2Dim mesh, ArrayOfRibs arrPt)
     {
         using var sw = new StreamWriter(_elemsPath);
-        sw.WriteLine((mesh.NodesAmountR - 1) * (mesh.NodesAmountZ - 1));
-        for (int k = 0; k < mesh.NodesAmountZ - 1; k++)
-            for (int i = 0; i < mesh.NodesAmountR - 1; i++)
-                sw.WriteLine($"{k * mesh.NodesAmountR + i} {k * mesh.NodesAmountR + i + 1} " +
-                             $"{(k + 1) * mesh.NodesAmountR + i} {(k + 1) * mesh.NodesAmountR + i + 1} " +
-                             $"{SelectMuAndSigma(mesh, arrPt[k * mesh.NodesAmountR + i], 
-                                                       arrPt[k * mesh.NodesAmountR + i + 1],
-                                                       arrPt[(k + 1) * mesh.NodesAmountR + i],
-                                                       arrPt[(k + 1) * mesh.NodesAmountR + i + 1])}");
+        sw.WriteLine((mesh.NodesAmountX - 1) * (mesh.NodesAmountY - 1));
+        for (int k = 0; k < mesh.NodesAmountY - 1; k++)
+            for (int i = 0; i < mesh.NodesAmountX - 1; i++)
+                sw.WriteLine($"{k * mesh.NodesAmountX + i} {k * mesh.NodesAmountX + i + 1} " +
+                             $"{(k + 1) * mesh.NodesAmountX + i} {(k + 1) * mesh.NodesAmountX + i + 1} " +
+                             $"{SelectMuAndSigma(mesh, arrPt[k * mesh.NodesAmountX + i], 
+                                                       arrPt[k * mesh.NodesAmountX + i + 1],
+                                                       arrPt[(k + 1) * mesh.NodesAmountX + i],
+                                                       arrPt[(k + 1) * mesh.NodesAmountX + i + 1])}");
+    }
+
+    public static ArrayOfElems GenerateListOfElems(ref Mesh2Dim mesh, ArrayOfRibs arrRibs)
+    {
+        var arr = new ArrayOfElems(mesh.ElemsAmount);
+
+        int rx = mesh.NodesAmountX - 1;
+        int ry = mesh.NodesAmountY - 1;
+
+        int nx = mesh.NodesAmountX;
+        int ny = mesh.NodesAmountY;
+
+        int rxy = rx * ny + ry * nx;
+        int nxy = nx * ny;
+
+        for (int j = 0; j < ny - 1; j++)
+            for (int i = 0; i < nx - 1; i++)
+            {
+                int curr = i + j * (nx + rx) + (rxy + nxy);
+
+                List<int> arr_i = [curr,               curr + rx,             curr + rx + 1,               curr + rx + nx];
+
+                arr.Add(arr_i);
+                arr.mui.Add(1.0D);
+                arr.sigmai.Add(1.0D);
+            }
+        return arr;
     }
 
     public static ArrayOfPoints GenerateListOfPoints(Mesh mesh)
@@ -149,6 +243,18 @@ public static class MeshGenerator
             foreach (var Y in mesh.nodesY)
                 foreach(var X in mesh.nodesX)
                     arr.Append(SetPointType3D(new Point(X, Y, Z), mesh));
+        return arr;
+    }
+
+    public static ArrayOfPoints GenerateListOfPoints(Mesh2Dim mesh)
+    {
+        if (mesh.nodesX is null) throw new ArgumentNullException("nodesX is null");
+        if (mesh.nodesY is null) throw new ArgumentNullException("nodesY is null");
+
+        var arr = new ArrayOfPoints(mesh.NodesAmountTotal);
+            foreach (var Y in mesh.nodesY)
+                foreach (var X in mesh.nodesX)
+                    arr.Append(SetPointType2D(new Point(X, Y), mesh));
         return arr;
     }
 
@@ -173,6 +279,24 @@ public static class MeshGenerator
         else
             pnt.Type = Location.Inside;
     
+        return pnt;
+    }
+
+    private static Point SetPointType2D(Point pnt, Mesh2Dim mesh)
+    {
+        if (mesh.nodesX is null) throw new ArgumentNullException("nodesX is null");
+        if (mesh.nodesY is null) throw new ArgumentNullException("nodesY is null");
+
+        double xMin = mesh.nodesX[0];
+        double xMax = mesh.nodesX[^1];
+        double yMin = mesh.nodesY[0];
+        double yMax = mesh.nodesY[^1];
+
+        if (pnt.X == xMin || pnt.X == xMax || pnt.Y == yMin || pnt.Y == yMax)
+            pnt.Type = Location.BoundaryI;
+        else
+            pnt.Type = Location.Inside;
+
         return pnt;
     }
 
@@ -331,19 +455,41 @@ public static class MeshGenerator
         return arr;
     }
 
+    public static ArrayOfRibs GenerateListOfRibs(Mesh2Dim mesh, ArrayOfPoints arrPt)
+    {
+        ArgumentNullException.ThrowIfNull(arrPt);
+
+        int nx = mesh.NodesAmountX;
+        int ny = mesh.NodesAmountY;
+        int nxny = nx * ny;
+
+        ArrayOfRibs arr = new(2 * nx * ny - nx - ny);
+
+        // Генерируем список всех ребер.
+        for (int j = 0; j < ny; j++)
+        {
+            for (int i = 0; i < nx - 1; i++)
+                arr.Add(new Rib(arrPt[nx * j + i], arrPt[nx * j + i + 1]));
+            if (j != ny - 1)
+                for (int i = 0; i < nx; i++)
+                    arr.Add(new Rib(arrPt[nx * j + i], arrPt[nx * (j + 1) + i]));
+        }
+        return arr;
+    }
+
     // ! Метод написан очень топорно, только для конкретного примера.
     private static string SelectMuAndSigma(Mesh2Dim mesh, Point a, Point b, Point c, Point d)
     {
         int index;
-        if (mesh.NodesZWithoutFragmentation[0] <= a.Z && d.Z <= mesh.NodesZWithoutFragmentation[1])
+        if (mesh.NodesYWithoutFragmentation[0] <= a.Z && d.Z <= mesh.NodesYWithoutFragmentation[1])
             index = 0;
-        else if (mesh.NodesZWithoutFragmentation[1] <= a.Z && d.Z <= mesh.NodesZWithoutFragmentation[2])
+        else if (mesh.NodesYWithoutFragmentation[1] <= a.Z && d.Z <= mesh.NodesYWithoutFragmentation[2])
             index = 1;
-        else if (mesh.NodesZWithoutFragmentation[2] <= a.Z && d.Z <= mesh.NodesZWithoutFragmentation[3])
+        else if (mesh.NodesYWithoutFragmentation[2] <= a.Z && d.Z <= mesh.NodesYWithoutFragmentation[3])
             index = 1;
-        else if (mesh.NodesZWithoutFragmentation[3] <= a.Z && d.Z <= mesh.NodesZWithoutFragmentation[4])
+        else if (mesh.NodesYWithoutFragmentation[3] <= a.Z && d.Z <= mesh.NodesYWithoutFragmentation[4])
             index = 1;
-        else if (mesh.NodesZWithoutFragmentation[4] <= a.Z && d.Z <= mesh.NodesZWithoutFragmentation[5])
+        else if (mesh.NodesYWithoutFragmentation[4] <= a.Z && d.Z <= mesh.NodesYWithoutFragmentation[5])
             index = 1;
         else
             throw new Exception("Out of boundary!");
@@ -354,24 +500,24 @@ public static class MeshGenerator
     {
         using var sw = new StreamWriter(_bordersPath);
 
-        sw.WriteLine(2 * (mesh.NodesAmountR - 1 + mesh.NodesAmountZ - 1));
+        sw.WriteLine(2 * (mesh.NodesAmountX - 1 + mesh.NodesAmountY - 1));
         
         foreach (var border in mesh.borders)
         {
             // TODO: Указывать через нормаль switch(*normal*)
             if (border[2] == border[3]) // border || oZ
             {
-                int iter = border[2] == 0 ? 0 : mesh.NodesAmountR - 1;
+                int iter = border[2] == 0 ? 0 : mesh.NodesAmountX - 1;
                 for (int i = 0; i < mesh.NodesAmountZ - 1; i++)
                 {
-                    sw.WriteLine($"{border[0]} {border[1]} {iter} {iter + mesh.NodesAmountR}");
-                    iter += mesh.NodesAmountR;
+                    sw.WriteLine($"{border[0]} {border[1]} {iter} {iter + mesh.NodesAmountX}");
+                    iter += mesh.NodesAmountX;
                 }
             }
             else if (border[4] == border[5]) // border || oR
             {
-                int iter = border[4] == 0 ? 0 : mesh.NodesAmountR * (mesh.NodesAmountZ - 1);
-                for (int i = 0; i < mesh.NodesAmountR - 1; i++)
+                int iter = border[4] == 0 ? 0 : mesh.NodesAmountX * (mesh.NodesAmountZ - 1);
+                for (int i = 0; i < mesh.NodesAmountX - 1; i++)
                 {
                     sw.WriteLine($"{border[0]} {border[1]} {iter} {iter + 1}");
                     iter++;
