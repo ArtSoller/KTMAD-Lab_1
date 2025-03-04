@@ -103,6 +103,88 @@ public static class Generator
         }
     }
 
+
+    public static void ConsiderBoundaryConditions2D(ref GlobalMatrix m, ref GlobalVector v, ArrayOfRibs arrRibs, ArrayOfBorders arrBrd, double t)
+    {
+        foreach (var border in arrBrd)
+        {
+            switch (border[0])
+            {
+                // КУ - I-го рода
+                case 1:
+                for (int j = m._ig[border[2]]; j < m._ig[border[2] + 1]; j++)
+                    m._al[j] = 0.0D;
+                m._diag[border[2]] = 1.0D;
+                for (int j = 0; j < m._jg.Count; j++)
+                    if (m._jg[j] == border[2])
+                        m._au[j] = 0.0D;
+                //for (int i = 2; i < 6; i++)
+                //{
+                //    for (int j = m._ig[border[i]]; j < m._ig[border[i] + 1]; j++)
+                //        m._al[j] = 0.0D;
+                //    m._diag[border[i]] = 1.0D;
+                //    for (int j = 0; j < m._jg.Count; j++)
+                //        if (m._jg[j] == border[i])
+                //            m._au[j] = 0.0D;
+                //}
+
+                var len = arrRibs[border[2]].Length;
+                var antinormal = ((arrRibs[border[2]].b.X - arrRibs[border[2]].a.X) / len, 
+                                  (arrRibs[border[2]].b.Y - arrRibs[border[2]].a.Y) / len); 
+                var xm = 0.5D * (arrRibs[border[2]].b.X + arrRibs[border[2]].a.X);
+                var ym = 0.5D * (arrRibs[border[2]].b.Y + arrRibs[border[2]].a.Y);
+                
+                var f = Function.A(xm, ym, t);
+                var q = antinormal.Item1 * f.Item1 + antinormal.Item2 * f.Item2;
+                v[border[2]] = q;
+
+                //for (int i = 2; i < 6; i++)
+                //{
+                //    var len = arrRibs[border[i]].Length;
+                //    var antinormal = ((arrRibs[border[i]].b.X - arrRibs[border[i]].a.X) / len, 
+                //                      (arrRibs[border[i]].b.Y - arrRibs[border[i]].a.Y) / len,
+                //                      (arrRibs[border[i]].b.Z - arrRibs[border[i]].a.Z) / len); 
+                //    var xm = 0.5D * (arrRibs[border[i]].b.X + arrRibs[border[i]].a.X);
+                //    var ym = 0.5D * (arrRibs[border[i]].b.Y + arrRibs[border[i]].a.Y);
+                //    var zm = 0.5D * (arrRibs[border[i]].b.Z + arrRibs[border[i]].a.Z);
+                //    
+                //    var f = Function.A(xm, ym, zm, t);
+                //    var q = antinormal.Item1 * f.Item1 + antinormal.Item2 * f.Item2 + antinormal.Item3 * f.Item3;
+                //    v[border[i]] = q;
+                //}
+
+                break;
+                // КУ - II-го рода
+                case 2:
+                    for (int i = 2; i < 4; i++)
+                        v[border[i]] += 0.0D;
+                    break;
+                // КУ - III-го рода
+                case 3: throw new ArgumentException("Пока нет возможности учитывать КУ III-го рода");
+            }
+        }
+
+        
+        //foreach (var border in arrBrd)
+        //{
+        //    for (int i = 2; i < 6; i++)
+        //    {
+        //        for (int j = 0; j < m.Size; j++)
+        //        {
+        //            if (border[i] == j)
+        //                continue;
+        //            else
+        //            {
+        //                var k = m[j, border[i]];
+        //                var f = -1.0D * k * v[border[i]];
+        //                v[j] += f;
+        //                m[j, border[i]] = 0.0D;
+        //            }
+        //        }
+        //    }
+        //}
+    }
+
     public static void ConsiderBoundaryConditions(ref GlobalMatrix m, ref GlobalVector v, ArrayOfRibs arrRibs, ArrayOfBorders arrBrd, double t)
     {
         foreach (var border in arrBrd)
@@ -168,6 +250,37 @@ public static class Generator
         //}
     }
 
+    public static void FillVector2D(ref GlobalVector v, ArrayOfRibs arrRibs, ArrayOfElems arrEl, double t)
+    {
+        for (int i = 0; i < arrEl.Length; i++)
+        {
+            List<int> currElem = [arrEl[i][1], arrEl[i][2],
+                                  arrEl[i][0], arrEl[i][3]];
+  
+            double x0 = double.NaN;
+            double x1 = double.NaN;
+            double y0 = double.NaN;
+            double y1 = double.NaN;
+
+            foreach (var rib in currElem)
+            {
+                if (rib != -1 && double.IsNaN(x0) && double.IsNaN(x1) && arrRibs[rib].GetNormal().Item1 != 0)
+                {
+                    x0 = arrRibs[rib].a.X;
+                    x1 = arrRibs[rib].b.X;
+                }
+                if (rib != -1 && double.IsNaN(y0) && double.IsNaN(y1) && arrRibs[rib].GetNormal().Item2 != 0)
+                {
+                    y0 = arrRibs[rib].a.Y;
+                    y1 = arrRibs[rib].b.Y;
+                }
+            }
+
+            var lv = new LocalVector2D(x0, x1, y0, y1, t);
+            Add(lv, ref v, currElem);
+        }
+    }
+
     public static void FillVector3D(ref GlobalVector v, ArrayOfRibs arrRibs, ArrayOfElems arrEl, double t)
     {
         for (int i = 0; i < arrEl.Length; i++)
@@ -206,6 +319,17 @@ public static class Generator
             Add(lv, ref v, currElem);
         }
     }
+
+    private static void Add(LocalVector2D lv, ref GlobalVector v, List<int> elem)
+    {
+        for (int i = 0; i < 4; i++)
+            if (elem[i] != -1)
+            {
+                var a = lv[i];
+                v[elem[i]] += lv[i];
+            }
+    }
+
 
     private static void Add(LocalVector3D lv, ref GlobalVector v, List<int> elem)
     {

@@ -5,6 +5,14 @@ namespace Functions;
 
 public static class Function
 {
+
+  public static (double, double) F(double x, double y, double t) => (y,
+                                                                     x);
+
+
+  public static (double, double) A(double x, double y, double t) => (y,
+                                                                     x);
+
     // Функция правой части.
     public static (double, double, double) F(double x, double y, double z, double t) => (y*y*z*z - 2*(y*y+z*z),
                                                                                          x*x*z*z - 2 * (x * x + z * z),

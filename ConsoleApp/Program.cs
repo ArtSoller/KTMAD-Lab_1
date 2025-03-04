@@ -34,7 +34,11 @@ MeshGenerator.GenerateMesh(ref myMesh);
 FEM2D myFEM = new(myMesh);
 myFEM.GenerateArrays();
 myFEM.ConstructMatrixAndVector();
-
+myFEM.SetSolver(new LOS());
+myFEM.Solve();
+myFEM.TestOutput2D(AnswerPath);
+myFEM.TestPoint(4.0 / 3.0, 4.0 / 3.0);
+myFEM.WriteData2D(AnswerPath);
 
 
 

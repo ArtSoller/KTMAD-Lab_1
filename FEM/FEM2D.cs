@@ -20,6 +20,7 @@ public class FEM2D : FEM
     public FEM2D(Mesh2Dim mesh)
     {
         mesh2D = mesh;
+        
     }
 
     public void GenerateArrays()
@@ -44,15 +45,15 @@ public class FEM2D : FEM
         Generator.FillMatrixG2D(ref G, ribsArr, elemsArr);
 
         var M = new GlobalMatrix(sparceMatrix);
-        Generator.FillMatrixM(ref M, ribsArr, elemsArr);
+        Generator.FillMatrixM2D(ref M, ribsArr, elemsArr);
 
         Matrix = G + M;
 
         var b = new GlobalVector(ribsArr.Count);
-        Generator.FillVector3D(ref b, ribsArr, elemsArr, 0.0);
+        Generator.FillVector2D(ref b, ribsArr, elemsArr, 0.0);
         Vector = b;
 
-        Generator.ConsiderBoundaryConditions(ref Matrix, ref Vector, ribsArr, bordersArr, 0.0D);
+        Generator.ConsiderBoundaryConditions2D(ref Matrix, ref Vector, ribsArr, bordersArr, 0.0D);
     }
 
     public void Solve()
@@ -118,6 +119,20 @@ public class FEM2D : FEM
         //}
     }
 
+    public void WriteData2D(string path)
+    {
+        if (Solutions is null) throw new ArgumentNullException("No solutions");
+
+        for (int t = 0; t < timeMesh.Length; t++)
+        {
+            using var sw = new StreamWriter(path + $"/Answer_{timeMesh[t]}.txt");
+            for (int i = 0; i < Solutions[t].Size; i++)
+                if (i == 16 || i == 24 || i == 26 || i == 27 || i == 29 || i == 37)
+                    sw.WriteLine($"{i} {Solutions[t][i]:E8}");
+            sw.Close();
+        }
+    }
+
     public void WriteData(string path)
     {
         if (Solutions is null) throw new ArgumentNullException("No solutions");
@@ -129,6 +144,53 @@ public class FEM2D : FEM
                 if (i == 16 || i == 24 || i == 26 || i == 27 || i == 29 || i == 37)
                     sw.WriteLine($"{i} {Solutions[t][i]:E8}");
             sw.Close();
+        }
+    }
+
+    public void TestPoint(double x, double y)
+    {
+        Point testPoint = new(x, y);
+
+        if (mesh2D.nodesX[0] <= x && x <= mesh2D.nodesX[^1] &&
+            mesh2D.nodesY[0] <= y && y <= mesh2D.nodesY[^1])
+        {
+            foreach (var elem in elemsArr)
+            {
+                int[] elem_local = [elem[1], elem[2], 
+                                    elem[0], elem[3]];
+
+                var ribX = ribsArr[elem_local[2]];
+                var ribY = ribsArr[elem_local[0]];
+
+                // if inside local elem.
+                if (ribX.a.X <= x && x <= ribX.b.X &&
+                    ribY.a.Y <= y && y <= ribY.b.Y)
+                {
+                    var eps = (x - ribX.a.X) / (ribX.b.X - ribX.a.X);
+                    var nu = (y - ribY.a.Y) / (ribY.b.Y - ribY.a.Y);
+
+
+                    double[] q = [Solutions[0][elem_local[0]], Solutions[0][elem_local[1]], 
+                                  Solutions[0][elem_local[2]], Solutions[0][elem_local[3]]];
+
+
+                    var ans = BasisFunctions2DVec.GetValue(eps, nu, q);
+                    var theorValue = Function.A(x, y, 0.0D);
+
+                    Console.WriteLine($"FEM A  {ans.Item1:E15} {ans.Item2:E15}");
+                    Console.WriteLine($"Theor  {theorValue.Item1:E15} {theorValue.Item2:E15}");
+
+                    var currAbsDiscX = Math.Abs(ans.Item1 - theorValue.Item1);
+                    var currAbsDiscY = Math.Abs(ans.Item2 - theorValue.Item2);
+
+                    var currRelDiscX = currAbsDiscX / Math.Abs(theorValue.Item1);
+                    var currRelDiscY = currAbsDiscY / Math.Abs(theorValue.Item2);
+
+                    Console.WriteLine($"CurrAD {currAbsDiscX:E15} {currAbsDiscY:E15}");
+                    Console.WriteLine($"CurrRD {currRelDiscX:E15} {currRelDiscY:E15}\n");
+                    break;
+                }
+            }
         }
     }
 
@@ -203,6 +265,82 @@ public class FEM2D : FEM
             }
         }
     }
+
+public void TestOutput2D(string path)
+    {
+        using var sw = new StreamWriter(path + "/Answer_Test.txt");
+
+        var absDiscX = 0.0D;
+        var absDiscY = 0.0D;
+
+        var absDivX = 0.0D;
+        var absDivY = 0.0D;
+
+        var relDiscX = 0.0D;
+        var relDiscY = 0.0D;
+
+        var relDivX = 0.0D;
+        var relDivY = 0.0D;
+
+        var squareDiffX = 0.0D;
+        var squareDiffY = 0.0D;
+
+        int iter = 0;
+
+        foreach (var elem in elemsArr)
+        {
+            int[] elem_local = [elem[1], elem[2], 
+                                elem[0], elem[3]];
+
+            var x = 0.5D * (ribsArr[elem_local[2]].a.X + ribsArr[elem_local[2]].b.X);
+            var y = 0.5D * (ribsArr[elem_local[0]].a.Y + ribsArr[elem_local[0]].b.Y);
+
+            sw.WriteLine($"Points {x:E15} {y:E15}");
+
+            var eps = (x - ribsArr[elem_local[2]].a.X) / (ribsArr[elem_local[2]].b.X - ribsArr[elem_local[2]].a.X);
+            var nu = (y - ribsArr[elem_local[0]].a.Y) / (ribsArr[elem_local[0]].b.Y - ribsArr[elem_local[0]].a.Y);
+
+            double[] q = [Solutions[0][elem_local[0]], Solutions[0][elem_local[1]], 
+                          Solutions[0][elem_local[2]], Solutions[0][elem_local[3]]];
+
+            var ans = BasisFunctions2DVec.GetValue(eps, nu, q);
+            var theorValue = Function.A(x, y, 0.0D);
+
+            sw.WriteLine($"FEM A  {ans.Item1:E15} {ans.Item2:E15}");
+            sw.WriteLine($"Theor  {theorValue.Item1:E15} {theorValue.Item2:E15}");
+
+            var currAbsDiscX = Math.Abs(ans.Item1 - theorValue.Item1);
+            var currAbsDiscY = Math.Abs(ans.Item2 - theorValue.Item2);
+
+            squareDiffX += currAbsDiscX * currAbsDiscX;
+            squareDiffY += currAbsDiscY * currAbsDiscY;
+
+            var currRelDiscX = currAbsDiscX / Math.Abs(theorValue.Item1);
+            var currRelDiscY = currAbsDiscY / Math.Abs(theorValue.Item2);
+
+            sw.WriteLine($"CurrAD {currAbsDiscX:E15} {currAbsDiscY:E15}");
+            sw.WriteLine($"CurrRD {currRelDiscX:E15} {currRelDiscY:E15}\n");
+
+            absDiscX += currAbsDiscX;
+            absDiscY += currAbsDiscY;
+
+            absDivX += theorValue.Item1;
+            absDivY += theorValue.Item2;
+
+            relDiscX += currRelDiscX * currRelDiscX;
+            relDiscY += currRelDiscY * currRelDiscY;
+
+            relDivX += theorValue.Item1 * theorValue.Item1;
+            relDivY += theorValue.Item2 * theorValue.Item2;
+
+            iter++;
+        }
+        sw.WriteLine($"Avg disc: {absDiscX / iter:E15} {absDiscY / iter:E15}");
+        sw.WriteLine($"Rel disc: {Math.Sqrt(relDiscX / relDivX):E15} {Math.Sqrt(relDiscY / relDivY):E15}");
+        sw.WriteLine($"SKO: {Math.Sqrt(squareDiffX / elemsArr.Length):E15} {Math.Sqrt(squareDiffY / elemsArr.Length):E15}");
+        sw.Close();
+    }
+
 
     public void TestOutput(string path)
     {

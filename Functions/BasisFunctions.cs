@@ -84,6 +84,25 @@ public static class BasisFunctions3D
     public static double Z2(double z1, double z0, double z) => (z - z0) / (z1 - z0);
 }
 
+public static class BasisFunctions2DVec
+{
+    public static (double, double) GetValue(double eps, double nu, double[] q)
+    {
+        if (q.Length != 4) throw new ArgumentException("q doesn't contain 4 values");
+        return (BF3(q[0], eps, nu) + BF4(q[1], eps, nu),
+                BF1(q[2], eps, nu) + BF2(q[3], eps, nu));
+    }
+
+    private static double BF1(double q, double eps, double nu) => q * LF1(eps);
+    private static double BF2(double q, double eps, double nu) => q * LF2(eps);
+    private static double BF3(double q, double eps, double nu) => q * LF1(nu);
+    private static double BF4(double q, double eps, double nu) => q * LF2(nu);
+
+    private static double LF1(double v) => 1 - v;
+    private static double LF2(double v) => v;
+}
+
+
 public static class BasisFunctions3DVec
 {
 
