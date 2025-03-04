@@ -89,8 +89,8 @@ public static class BasisFunctions2DVec
     public static (double, double) GetValue(double eps, double nu, double[] q)
     {
         if (q.Length != 4) throw new ArgumentException("q doesn't contain 4 values");
-        return (BF3(q[0], eps, nu) + BF4(q[1], eps, nu),
-                BF1(q[2], eps, nu) + BF2(q[3], eps, nu));
+        return (BF3(q[2], eps, nu) + BF4(q[3], eps, nu),
+                BF1(q[0], eps, nu) + BF2(q[1], eps, nu));
     }
 
     private static double BF1(double q, double eps, double nu) => q * LF1(eps);
