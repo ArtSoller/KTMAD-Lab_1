@@ -1,0 +1,223 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{namespace}\PYG{+w}{ }\PYG{n+nn}{Project}\PYG{p}{;}
+
+\PYG{k}{using}\PYG{+w}{ }\PYG{n+nn}{System.Collections.Immutable}\PYG{p}{;}
+\PYG{k}{using}\PYG{+w}{ }\PYG{n+nn}{System.Numerics}\PYG{p}{;}
+\PYG{k}{using}\PYG{+w}{ }\PYG{n+nn}{MathObjects}\PYG{p}{;}
+\PYG{k}{using}\PYG{+w}{ }\PYG{n+nn}{Solver}\PYG{p}{;}
+\PYG{k}{using}\PYG{+w}{ }\PYG{n+nn}{Grid}\PYG{p}{;}
+\PYG{k}{using}\PYG{+w}{ }\PYG{n+nn}{DataStructs}\PYG{p}{;}
+\PYG{k}{using}\PYG{+w}{ }\PYG{n+nn}{System.Diagnostics}\PYG{p}{;}
+\PYG{k}{using}\PYG{+w}{ }\PYG{n+nn}{Functions}\PYG{p}{;}
+\PYG{k}{using}\PYG{+w}{ }\PYG{n+nn}{System.ComponentModel.DataAnnotations}\PYG{p}{;}
+\PYG{k}{using}\PYG{+w}{ }\PYG{n+nn}{System.Timers}\PYG{p}{;}
+
+\PYG{k}{public}\PYG{+w}{ }\PYG{k}{class}\PYG{+w}{ }\PYG{n+nc}{FEM3D}\PYG{+w}{ }\PYG{p}{:}\PYG{+w}{ }\PYG{n}{FEM}
+\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k}{public}\PYG{+w}{ }\PYG{n}{ArrayOfRibs}\PYG{+w}{ }\PYG{n}{ribsArr}\PYG{p}{;}
+
+\PYG{+w}{    }\PYG{c+c1}{// Maybe private?}
+\PYG{+w}{    }\PYG{k}{public}\PYG{+w}{ }\PYG{n}{List}\PYG{o}{\PYGZlt{}}\PYG{n}{Layer}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{Layers}\PYG{p}{;}
+
+\PYG{+w}{    }\PYG{k}{public}\PYG{+w}{ }\PYG{n+nf}{FEM3D}\PYG{p}{()}
+\PYG{+w}{    }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n}{Layers}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{[];}
+\PYG{+w}{        }\PYG{n}{mesh}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{Mesh3Dim}
+\PYG{+w}{        }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{n}{nodesX}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{[],}
+\PYG{+w}{            }\PYG{n}{nodesY}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{[],}
+\PYG{+w}{            }\PYG{n}{nodesZ}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{[]}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{};}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{    }\PYG{k}{public}\PYG{+w}{ }\PYG{k}{void}\PYG{+w}{ }\PYG{n+nf}{ConstructMesh}\PYG{p}{(}\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{nx}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{ny}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{nz}\PYG{p}{)}
+\PYG{+w}{    }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{mesh}\PYG{+w}{ }\PYG{o}{==}\PYG{+w}{ }\PYG{k}{null}\PYG{p}{)}\PYG{+w}{ }\PYG{k}{throw}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ArgumentNullException}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Mesh is null\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{        }
+\PYG{+w}{        }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{hx}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{2.0D}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{hy}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{2.0D}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{hz}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{2.0D}\PYG{p}{;}
+\PYG{+w}{        }
+\PYG{+w}{        }\PYG{n}{mesh}\PYG{p}{.}\PYG{n}{nodesX}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{[];}
+\PYG{+w}{        }\PYG{n}{mesh}\PYG{p}{.}\PYG{n}{nodesY}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{[];}
+\PYG{+w}{        }\PYG{n}{mesh}\PYG{p}{.}\PYG{n}{nodesZ}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{[];}
+
+\PYG{+w}{        }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{i}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{i}\PYG{+w}{ }\PYG{o}{\PYGZlt{}}\PYG{+w}{ }\PYG{n}{nx}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{i}\PYG{o}{++}\PYG{p}{)}
+\PYG{+w}{        }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{stepx}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{hx}\PYG{+w}{ }\PYG{o}{/}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{nx}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+m}{1}\PYG{p}{);}
+\PYG{+w}{            }\PYG{n}{mesh}\PYG{p}{.}\PYG{n}{nodesX}\PYG{p}{.}\PYG{n}{Add}\PYG{p}{(}\PYG{n}{i}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{stepx}\PYG{p}{);}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{        }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{i}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{i}\PYG{+w}{ }\PYG{o}{\PYGZlt{}}\PYG{+w}{ }\PYG{n}{ny}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{i}\PYG{o}{++}\PYG{p}{)}
+\PYG{+w}{        }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{stepy}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{hy}\PYG{+w}{ }\PYG{o}{/}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{ny}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+m}{1}\PYG{p}{);}
+\PYG{+w}{            }\PYG{n}{mesh}\PYG{p}{.}\PYG{n}{nodesY}\PYG{p}{.}\PYG{n}{Add}\PYG{p}{(}\PYG{n}{i}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{stepy}\PYG{p}{);}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }
+\PYG{+w}{        }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{i}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{i}\PYG{+w}{ }\PYG{o}{\PYGZlt{}}\PYG{+w}{ }\PYG{n}{nz}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{i}\PYG{o}{++}\PYG{p}{)}
+\PYG{+w}{        }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{stepz}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{hz}\PYG{+w}{ }\PYG{o}{/}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{nz}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{l+m}{1}\PYG{p}{);}
+\PYG{+w}{            }\PYG{n}{mesh}\PYG{p}{.}\PYG{n}{nodesZ}\PYG{p}{.}\PYG{n}{Add}\PYG{p}{(}\PYG{n}{i}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{stepz}\PYG{p}{);}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{        }\PYG{n}{timeMesh}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{[}\PYG{l+m}{1.0D}\PYG{p}{];}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{    }
+
+\PYG{+w}{    }\PYG{k}{public}\PYG{+w}{ }\PYG{k}{void}\PYG{+w}{ }\PYG{n+nf}{GenerateArrays}\PYG{p}{()}
+\PYG{+w}{    }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{mesh}\PYG{+w}{ }\PYG{k}{is}\PYG{+w}{ }\PYG{k}{null}\PYG{p}{)}\PYG{+w}{ }\PYG{k}{throw}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ArgumentNullException}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}mesh is null!\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{        }\PYG{n}{pointsArr}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{MeshGenerator}\PYG{p}{.}\PYG{n}{GenerateListOfPoints}\PYG{p}{(}\PYG{n}{mesh}\PYG{p}{);}
+\PYG{+w}{        }\PYG{n}{ribsArr}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{MeshGenerator}\PYG{p}{.}\PYG{n}{GenerateListOfRibs}\PYG{p}{(}\PYG{n}{mesh}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{pointsArr}\PYG{p}{);}
+\PYG{+w}{        }\PYG{n}{elemsArr}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{MeshGenerator}\PYG{p}{.}\PYG{n}{GenerateListOfElems}\PYG{p}{(}\PYG{n}{mesh}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ribsArr}\PYG{p}{);}
+\PYG{+w}{        }\PYG{n}{bordersArr}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{MeshGenerator}\PYG{p}{.}\PYG{n}{GenerateListOfBorders}\PYG{p}{(}\PYG{n}{mesh}\PYG{p}{);}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{    }\PYG{k}{public}\PYG{+w}{ }\PYG{k}{void}\PYG{+w}{ }\PYG{n+nf}{AddField}\PYG{p}{(}\PYG{n}{Layer}\PYG{+w}{ }\PYG{n}{layer}\PYG{p}{)}
+\PYG{+w}{    }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n}{ArgumentNullException}\PYG{p}{.}\PYG{n}{ThrowIfNull}\PYG{p}{(}\PYG{n}{layer}\PYG{p}{);}
+\PYG{+w}{        }\PYG{n}{Layers}\PYG{p}{.}\PYG{n}{Add}\PYG{p}{(}\PYG{n}{layer}\PYG{p}{);}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{    }\PYG{k}{public}\PYG{+w}{ }\PYG{k}{void}\PYG{+w}{ }\PYG{n+nf}{CommitFields}\PYG{p}{()}
+\PYG{+w}{    }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{elemsArr}\PYG{+w}{ }\PYG{k}{is}\PYG{+w}{ }\PYG{k}{null}\PYG{p}{)}\PYG{+w}{ }\PYG{k}{throw}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ArgumentNullException}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}elemsArr is null\PYGZdq{}}\PYG{p}{);}
+
+\PYG{+w}{        }\PYG{k}{foreach}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{layer}\PYG{+w}{ }\PYG{k}{in}\PYG{+w}{ }\PYG{n}{Layers}\PYG{p}{)}
+\PYG{+w}{        }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{i}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{i}\PYG{+w}{ }\PYG{o}{\PYGZlt{}}\PYG{+w}{ }\PYG{n}{elemsArr}\PYG{p}{.}\PYG{n}{Length}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{i}\PYG{o}{++}\PYG{p}{)}
+\PYG{+w}{            }\PYG{p}{\PYGZob{}}
+\PYG{+w}{                }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{minz}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Math}\PYG{p}{.}\PYG{n}{Min}\PYG{p}{(}\PYG{n}{ribsArr}\PYG{p}{[}\PYG{n}{elemsArr}\PYG{p}{[}\PYG{n}{i}\PYG{p}{][}\PYG{o}{\PYGZca{}}\PYG{l+m}{1}\PYG{p}{]].}\PYG{n}{a}\PYG{p}{.}\PYG{n}{Z}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ribsArr}\PYG{p}{[}\PYG{n}{elemsArr}\PYG{p}{[}\PYG{n}{i}\PYG{p}{][}\PYG{o}{\PYGZca{}}\PYG{l+m}{1}\PYG{p}{]].}\PYG{n}{b}\PYG{p}{.}\PYG{n}{Z}\PYG{p}{);}
+\PYG{+w}{                }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{maxz}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Math}\PYG{p}{.}\PYG{n}{Max}\PYG{p}{(}\PYG{n}{ribsArr}\PYG{p}{[}\PYG{n}{elemsArr}\PYG{p}{[}\PYG{n}{i}\PYG{p}{][}\PYG{o}{\PYGZca{}}\PYG{l+m}{1}\PYG{p}{]].}\PYG{n}{a}\PYG{p}{.}\PYG{n}{Z}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ribsArr}\PYG{p}{[}\PYG{n}{elemsArr}\PYG{p}{[}\PYG{n}{i}\PYG{p}{][}\PYG{o}{\PYGZca{}}\PYG{l+m}{1}\PYG{p}{]].}\PYG{n}{b}\PYG{p}{.}\PYG{n}{Z}\PYG{p}{);}
+\PYG{+w}{                }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{layer}\PYG{p}{.}\PYG{n}{z0}\PYG{+w}{ }\PYG{o}{\PYGZlt{}=}\PYG{+w}{ }\PYG{n}{minz}\PYG{+w}{ }\PYG{o}{\PYGZam{}\PYGZam{}}\PYG{+w}{ }\PYG{n}{maxz}\PYG{+w}{ }\PYG{o}{\PYGZlt{}=}\PYG{+w}{ }\PYG{n}{layer}\PYG{p}{.}\PYG{n}{z1}\PYG{p}{)}
+\PYG{+w}{                    }\PYG{n}{elemsArr}\PYG{p}{.}\PYG{n}{sigmai}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{layer}\PYG{p}{.}\PYG{n}{sigma}\PYG{p}{;}
+\PYG{+w}{            }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{    }\PYG{k}{public}\PYG{+w}{ }\PYG{k}{void}\PYG{+w}{ }\PYG{n+nf}{ConstructMatrixAndVector}\PYG{p}{()}
+\PYG{+w}{    }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{elemsArr}\PYG{+w}{ }\PYG{k}{is}\PYG{+w}{ }\PYG{k}{null}\PYG{p}{)}\PYG{+w}{ }\PYG{k}{throw}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ArgumentNullException}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}elemsArr is null\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{bordersArr}\PYG{+w}{ }\PYG{k}{is}\PYG{+w}{ }\PYG{k}{null}\PYG{p}{)}\PYG{+w}{ }\PYG{k}{throw}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ArgumentNullException}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}bordersArr is null\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{        }
+\PYG{+w}{        }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{sparceMatrix}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{GlobalMatrix}\PYG{p}{(}\PYG{n}{ribsArr}\PYG{p}{.}\PYG{n}{Count}\PYG{p}{);}
+\PYG{+w}{        }\PYG{n}{Generator}\PYG{p}{.}\PYG{n}{BuildPortait}\PYG{p}{(}\PYG{k}{ref}\PYG{+w}{ }\PYG{n}{sparceMatrix}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ribsArr}\PYG{p}{.}\PYG{n}{Count}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{elemsArr}\PYG{p}{);}
+
+\PYG{+w}{        }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{G}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{GlobalMatrix}\PYG{p}{(}\PYG{n}{sparceMatrix}\PYG{p}{);}
+\PYG{+w}{        }\PYG{n}{Generator}\PYG{p}{.}\PYG{n}{FillMatrixG}\PYG{p}{(}\PYG{k}{ref}\PYG{+w}{ }\PYG{n}{G}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ribsArr}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{elemsArr}\PYG{p}{);}
+\PYG{+w}{        }
+\PYG{+w}{        }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{M}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{GlobalMatrix}\PYG{p}{(}\PYG{n}{sparceMatrix}\PYG{p}{);}
+\PYG{+w}{        }\PYG{n}{Generator}\PYG{p}{.}\PYG{n}{FillMatrixM}\PYG{p}{(}\PYG{k}{ref}\PYG{+w}{ }\PYG{n}{M}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ribsArr}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{elemsArr}\PYG{p}{);}
+\PYG{+w}{        }
+\PYG{+w}{        }\PYG{n}{Matrix}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{G}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{M}\PYG{p}{;}
+
+\PYG{+w}{        }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{b}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{GlobalVector}\PYG{p}{(}\PYG{n}{ribsArr}\PYG{p}{.}\PYG{n}{Count}\PYG{p}{);}
+\PYG{+w}{        }\PYG{n}{Generator}\PYG{p}{.}\PYG{n}{FillVector3D}\PYG{p}{(}\PYG{k}{ref}\PYG{+w}{ }\PYG{n}{b}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ribsArr}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{elemsArr}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0}\PYG{p}{);}
+\PYG{+w}{        }\PYG{n}{Vector}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{b}\PYG{p}{;}
+
+\PYG{+w}{        }\PYG{n}{Generator}\PYG{p}{.}\PYG{n}{ConsiderBoundaryConditions}\PYG{p}{(}\PYG{k}{ref}\PYG{+w}{ }\PYG{n}{Matrix}\PYG{p}{,}\PYG{+w}{ }\PYG{k}{ref}\PYG{+w}{ }\PYG{n}{Vector}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ribsArr}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{bordersArr}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{);}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{    }\PYG{k}{public}\PYG{+w}{ }\PYG{k}{void}\PYG{+w}{ }\PYG{n+nf}{Solve}\PYG{p}{()}
+\PYG{+w}{    }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{solver}\PYG{+w}{ }\PYG{k}{is}\PYG{+w}{ }\PYG{k}{null}\PYG{p}{)}\PYG{+w}{ }\PYG{k}{throw}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ArgumentNullException}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Solver is null\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{Matrix}\PYG{+w}{ }\PYG{k}{is}\PYG{+w}{ }\PYG{k}{null}\PYG{p}{)}\PYG{+w}{ }\PYG{k}{throw}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ArgumentNullException}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Matrix is null\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{        }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{Vector}\PYG{+w}{ }\PYG{k}{is}\PYG{+w}{ }\PYG{k}{null}\PYG{p}{)}\PYG{+w}{ }\PYG{k}{throw}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{ArgumentNullException}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Vector is null\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{        }\PYG{n}{Solutions}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{GlobalVector}\PYG{p}{[}\PYG{n}{timeMesh}\PYG{p}{.}\PYG{n}{Length}\PYG{p}{];}
+\PYG{+w}{        }\PYG{n}{Discrepancy}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{GlobalVector}\PYG{p}{[}\PYG{n}{timeMesh}\PYG{p}{.}\PYG{n}{Length}\PYG{p}{];}
+\PYG{+w}{        }\PYG{p}{(}\PYG{n}{Solutions}\PYG{p}{[}\PYG{l+m}{0}\PYG{p}{],}\PYG{+w}{ }\PYG{n}{Discrepancy}\PYG{p}{[}\PYG{l+m}{0}\PYG{p}{])}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{solver}\PYG{p}{.}\PYG{n}{Solve}\PYG{p}{(}\PYG{n}{Matrix}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Vector}\PYG{p}{);}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{    }\PYG{k}{public}\PYG{+w}{ }\PYG{k}{void}\PYG{+w}{ }\PYG{n+nf}{TestOutput}\PYG{p}{(}\PYG{k+kt}{string}\PYG{+w}{ }\PYG{n}{path}\PYG{p}{)}
+\PYG{+w}{    }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k}{using}\PYG{+w}{ }\PYG{n+nn}{var}\PYG{+w}{ }\PYG{n}{sw}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{+w}{ }\PYG{n}{StreamWriter}\PYG{p}{(}\PYG{n}{path}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+s}{\PYGZdq{}/Answer3D/Answer\PYGZus{}Test.txt\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{        }
+\PYG{+w}{        }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{absDiscX}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{absDiscY}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{absDiscZ}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{;}
+
+\PYG{+w}{        }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{absDivX}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{absDivY}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{absDivZ}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{;}
+
+\PYG{+w}{        }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{relDiscX}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{relDiscY}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{relDiscZ}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{;}
+
+\PYG{+w}{        }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{relDivX}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{relDivY}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{relDivZ}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{;}
+
+\PYG{+w}{        }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{squareDiffX}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{squareDiffY}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{squareDiffZ}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{;}
+
+\PYG{+w}{        }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{iter}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0}\PYG{p}{;}
+
+\PYG{+w}{        }\PYG{k}{foreach}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{elem}\PYG{+w}{ }\PYG{k}{in}\PYG{+w}{ }\PYG{n}{elemsArr}\PYG{p}{)}
+\PYG{+w}{        }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{k+kt}{int}\PYG{p}{[]}\PYG{+w}{ }\PYG{n}{elem\PYGZus{}local}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{[}\PYG{n}{elem}\PYG{p}{[}\PYG{l+m}{0}\PYG{p}{],}\PYG{+w}{ }\PYG{n}{elem}\PYG{p}{[}\PYG{l+m}{3}\PYG{p}{],}\PYG{+w}{ }\PYG{n}{elem}\PYG{p}{[}\PYG{l+m}{8}\PYG{p}{],}\PYG{+w}{ }\PYG{n}{elem}\PYG{p}{[}\PYG{l+m}{11}\PYG{p}{],}
+\PYG{+w}{                                }\PYG{n}{elem}\PYG{p}{[}\PYG{l+m}{1}\PYG{p}{],}\PYG{+w}{ }\PYG{n}{elem}\PYG{p}{[}\PYG{l+m}{2}\PYG{p}{],}\PYG{+w}{ }\PYG{n}{elem}\PYG{p}{[}\PYG{l+m}{9}\PYG{p}{],}\PYG{+w}{ }\PYG{n}{elem}\PYG{p}{[}\PYG{l+m}{10}\PYG{p}{],}
+\PYG{+w}{                                }\PYG{n}{elem}\PYG{p}{[}\PYG{l+m}{4}\PYG{p}{],}\PYG{+w}{ }\PYG{n}{elem}\PYG{p}{[}\PYG{l+m}{5}\PYG{p}{],}\PYG{+w}{ }\PYG{n}{elem}\PYG{p}{[}\PYG{l+m}{6}\PYG{p}{],}\PYG{+w}{ }\PYG{n}{elem}\PYG{p}{[}\PYG{l+m}{7}\PYG{p}{]];}
+\PYG{+w}{            }
+\PYG{+w}{            }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{x}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0.5D}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{ribsArr}\PYG{p}{[}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{0}\PYG{p}{]].}\PYG{n}{a}\PYG{p}{.}\PYG{n}{X}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{ribsArr}\PYG{p}{[}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{0}\PYG{p}{]].}\PYG{n}{b}\PYG{p}{.}\PYG{n}{X}\PYG{p}{);}
+\PYG{+w}{            }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{y}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0.5D}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{ribsArr}\PYG{p}{[}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{4}\PYG{p}{]].}\PYG{n}{a}\PYG{p}{.}\PYG{n}{Y}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{ribsArr}\PYG{p}{[}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{4}\PYG{p}{]].}\PYG{n}{b}\PYG{p}{.}\PYG{n}{Y}\PYG{p}{);}
+\PYG{+w}{            }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{z}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0.5D}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{ribsArr}\PYG{p}{[}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{8}\PYG{p}{]].}\PYG{n}{a}\PYG{p}{.}\PYG{n}{Z}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{ribsArr}\PYG{p}{[}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{8}\PYG{p}{]].}\PYG{n}{b}\PYG{p}{.}\PYG{n}{Z}\PYG{p}{);}
+
+\PYG{+w}{            }\PYG{n}{sw}\PYG{p}{.}\PYG{n}{WriteLine}\PYG{p}{(}\PYG{l+s}{\PYGZdl{}\PYGZdq{}Points \PYGZob{}x:E15\PYGZcb{} \PYGZob{}y:E15\PYGZcb{} \PYGZob{}z:E15\PYGZcb{}\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{            }
+\PYG{+w}{            }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{eps}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{x}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{n}{ribsArr}\PYG{p}{[}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{0}\PYG{p}{]].}\PYG{n}{a}\PYG{p}{.}\PYG{n}{X}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{/}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{ribsArr}\PYG{p}{[}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{0}\PYG{p}{]].}\PYG{n}{b}\PYG{p}{.}\PYG{n}{X}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{n}{ribsArr}\PYG{p}{[}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{0}\PYG{p}{]].}\PYG{n}{a}\PYG{p}{.}\PYG{n}{X}\PYG{p}{);}
+\PYG{+w}{            }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{nu}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{  }\PYG{p}{(}\PYG{n}{y}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{n}{ribsArr}\PYG{p}{[}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{4}\PYG{p}{]].}\PYG{n}{a}\PYG{p}{.}\PYG{n}{Y}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{/}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{ribsArr}\PYG{p}{[}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{4}\PYG{p}{]].}\PYG{n}{b}\PYG{p}{.}\PYG{n}{Y}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{n}{ribsArr}\PYG{p}{[}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{4}\PYG{p}{]].}\PYG{n}{a}\PYG{p}{.}\PYG{n}{Y}\PYG{p}{);}
+\PYG{+w}{            }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{khi}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{z}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{n}{ribsArr}\PYG{p}{[}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{8}\PYG{p}{]].}\PYG{n}{a}\PYG{p}{.}\PYG{n}{Z}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{/}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{ribsArr}\PYG{p}{[}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{8}\PYG{p}{]].}\PYG{n}{b}\PYG{p}{.}\PYG{n}{Z}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{n}{ribsArr}\PYG{p}{[}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{8}\PYG{p}{]].}\PYG{n}{a}\PYG{p}{.}\PYG{n}{Z}\PYG{p}{);}
+
+\PYG{+w}{            }\PYG{k+kt}{double}\PYG{p}{[]}\PYG{+w}{ }\PYG{n}{q}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{[}\PYG{n}{Solutions}\PYG{p}{[}\PYG{l+m}{0}\PYG{p}{][}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{0}\PYG{p}{]],}\PYG{+w}{ }\PYG{n}{Solutions}\PYG{p}{[}\PYG{l+m}{0}\PYG{p}{][}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{1}\PYG{p}{]],}\PYG{+w}{ }\PYG{n}{Solutions}\PYG{p}{[}\PYG{l+m}{0}\PYG{p}{][}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{2}\PYG{p}{]],}\PYG{+w}{ }\PYG{n}{Solutions}\PYG{p}{[}\PYG{l+m}{0}\PYG{p}{][}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{3}\PYG{p}{]],}\PYG{+w}{ }
+\PYG{+w}{                          }\PYG{n}{Solutions}\PYG{p}{[}\PYG{l+m}{0}\PYG{p}{][}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{4}\PYG{p}{]],}\PYG{+w}{ }\PYG{n}{Solutions}\PYG{p}{[}\PYG{l+m}{0}\PYG{p}{][}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{5}\PYG{p}{]],}\PYG{+w}{ }\PYG{n}{Solutions}\PYG{p}{[}\PYG{l+m}{0}\PYG{p}{][}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{6}\PYG{p}{]],}\PYG{+w}{ }\PYG{n}{Solutions}\PYG{p}{[}\PYG{l+m}{0}\PYG{p}{][}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{7}\PYG{p}{]],}
+\PYG{+w}{                          }\PYG{n}{Solutions}\PYG{p}{[}\PYG{l+m}{0}\PYG{p}{][}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{8}\PYG{p}{]],}\PYG{+w}{ }\PYG{n}{Solutions}\PYG{p}{[}\PYG{l+m}{0}\PYG{p}{][}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{9}\PYG{p}{]],}\PYG{+w}{ }\PYG{n}{Solutions}\PYG{p}{[}\PYG{l+m}{0}\PYG{p}{][}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{10}\PYG{p}{]],}\PYG{+w}{ }\PYG{n}{Solutions}\PYG{p}{[}\PYG{l+m}{0}\PYG{p}{][}\PYG{n}{elem\PYGZus{}local}\PYG{p}{[}\PYG{l+m}{11}\PYG{p}{]]];}
+\PYG{+w}{            }
+\PYG{+w}{            }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{ans}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{BasisFunctions3DVec}\PYG{p}{.}\PYG{n}{GetValue}\PYG{p}{(}\PYG{n}{eps}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{nu}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{khi}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{q}\PYG{p}{);}
+\PYG{+w}{            }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{theorValue}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Function}\PYG{p}{.}\PYG{n}{A}\PYG{p}{(}\PYG{n}{x}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{y}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{z}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{);}
+
+\PYG{+w}{            }\PYG{n}{sw}\PYG{p}{.}\PYG{n}{WriteLine}\PYG{p}{(}\PYG{l+s}{\PYGZdl{}\PYGZdq{}FEM A  \PYGZob{}ans.Item1:E15\PYGZcb{} \PYGZob{}ans.Item2:E15\PYGZcb{} \PYGZob{}ans.Item3:E15\PYGZcb{}\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{            }\PYG{n}{sw}\PYG{p}{.}\PYG{n}{WriteLine}\PYG{p}{(}\PYG{l+s}{\PYGZdl{}\PYGZdq{}Theor  \PYGZob{}theorValue.Item1:E15\PYGZcb{} \PYGZob{}theorValue.Item2:E15\PYGZcb{} \PYGZob{}theorValue.Item3:E15\PYGZcb{}\PYGZdq{}}\PYG{p}{);}
+
+\PYG{+w}{            }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{currAbsDiscX}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Math}\PYG{p}{.}\PYG{n}{Abs}\PYG{p}{(}\PYG{n}{ans}\PYG{p}{.}\PYG{n}{Item1}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{n}{theorValue}\PYG{p}{.}\PYG{n}{Item1}\PYG{p}{);}
+\PYG{+w}{            }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{currAbsDiscY}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Math}\PYG{p}{.}\PYG{n}{Abs}\PYG{p}{(}\PYG{n}{ans}\PYG{p}{.}\PYG{n}{Item2}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{n}{theorValue}\PYG{p}{.}\PYG{n}{Item2}\PYG{p}{);}
+\PYG{+w}{            }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{currAbsDiscZ}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Math}\PYG{p}{.}\PYG{n}{Abs}\PYG{p}{(}\PYG{n}{ans}\PYG{p}{.}\PYG{n}{Item3}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{n}{theorValue}\PYG{p}{.}\PYG{n}{Item3}\PYG{p}{);}
+
+\PYG{+w}{            }\PYG{n}{squareDiffX}\PYG{+w}{ }\PYG{o}{+=}\PYG{+w}{ }\PYG{n}{currAbsDiscX}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{currAbsDiscX}\PYG{p}{;}
+\PYG{+w}{            }\PYG{n}{squareDiffY}\PYG{+w}{ }\PYG{o}{+=}\PYG{+w}{ }\PYG{n}{currAbsDiscY}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{currAbsDiscY}\PYG{p}{;}
+\PYG{+w}{            }\PYG{n}{squareDiffZ}\PYG{+w}{ }\PYG{o}{+=}\PYG{+w}{ }\PYG{n}{currAbsDiscZ}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{currAbsDiscZ}\PYG{p}{;}
+
+\PYG{+w}{            }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{currRelDiscX}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{currAbsDiscX}\PYG{+w}{ }\PYG{o}{/}\PYG{+w}{ }\PYG{n}{Math}\PYG{p}{.}\PYG{n}{Abs}\PYG{p}{(}\PYG{n}{theorValue}\PYG{p}{.}\PYG{n}{Item1}\PYG{p}{);}
+\PYG{+w}{            }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{currRelDiscY}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{currAbsDiscY}\PYG{+w}{ }\PYG{o}{/}\PYG{+w}{ }\PYG{n}{Math}\PYG{p}{.}\PYG{n}{Abs}\PYG{p}{(}\PYG{n}{theorValue}\PYG{p}{.}\PYG{n}{Item2}\PYG{p}{);}
+\PYG{+w}{            }\PYG{k+kt}{var}\PYG{+w}{ }\PYG{n}{currRelDiscZ}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{currAbsDiscZ}\PYG{+w}{ }\PYG{o}{/}\PYG{+w}{ }\PYG{n}{Math}\PYG{p}{.}\PYG{n}{Abs}\PYG{p}{(}\PYG{n}{theorValue}\PYG{p}{.}\PYG{n}{Item3}\PYG{p}{);}
+
+\PYG{+w}{            }\PYG{n}{sw}\PYG{p}{.}\PYG{n}{WriteLine}\PYG{p}{(}\PYG{l+s}{\PYGZdl{}\PYGZdq{}CurrAD \PYGZob{}currAbsDiscX:E15\PYGZcb{} \PYGZob{}currAbsDiscY:E15\PYGZcb{} \PYGZob{}currAbsDiscZ:E15\PYGZcb{}\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{            }\PYG{n}{sw}\PYG{p}{.}\PYG{n}{WriteLine}\PYG{p}{(}\PYG{l+s}{\PYGZdl{}\PYGZdq{}CurrRD \PYGZob{}currRelDiscX:E15\PYGZcb{} \PYGZob{}currRelDiscY:E15\PYGZcb{} \PYGZob{}currRelDiscZ:E15\PYGZcb{}\PYGZbs{}n\PYGZdq{}}\PYG{p}{);}
+
+\PYG{+w}{            }\PYG{n}{absDiscX}\PYG{+w}{ }\PYG{o}{+=}\PYG{+w}{ }\PYG{n}{currAbsDiscX}\PYG{p}{;}
+\PYG{+w}{            }\PYG{n}{absDiscY}\PYG{+w}{ }\PYG{o}{+=}\PYG{+w}{ }\PYG{n}{currAbsDiscY}\PYG{p}{;}
+\PYG{+w}{            }\PYG{n}{absDiscZ}\PYG{+w}{ }\PYG{o}{+=}\PYG{+w}{ }\PYG{n}{currAbsDiscZ}\PYG{p}{;}
+
+\PYG{+w}{            }\PYG{n}{absDivX}\PYG{+w}{ }\PYG{o}{+=}\PYG{+w}{ }\PYG{n}{theorValue}\PYG{p}{.}\PYG{n}{Item1}\PYG{p}{;}
+\PYG{+w}{            }\PYG{n}{absDivY}\PYG{+w}{ }\PYG{o}{+=}\PYG{+w}{ }\PYG{n}{theorValue}\PYG{p}{.}\PYG{n}{Item2}\PYG{p}{;}
+\PYG{+w}{            }\PYG{n}{absDivZ}\PYG{+w}{ }\PYG{o}{+=}\PYG{+w}{ }\PYG{n}{theorValue}\PYG{p}{.}\PYG{n}{Item3}\PYG{p}{;}
+
+\PYG{+w}{            }\PYG{n}{relDiscX}\PYG{+w}{ }\PYG{o}{+=}\PYG{+w}{ }\PYG{n}{currRelDiscX}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{currRelDiscX}\PYG{p}{;}
+\PYG{+w}{            }\PYG{n}{relDiscY}\PYG{+w}{ }\PYG{o}{+=}\PYG{+w}{ }\PYG{n}{currRelDiscY}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{currRelDiscY}\PYG{p}{;}
+\PYG{+w}{            }\PYG{n}{relDiscZ}\PYG{+w}{ }\PYG{o}{+=}\PYG{+w}{ }\PYG{n}{currRelDiscZ}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{currRelDiscZ}\PYG{p}{;}
+
+\PYG{+w}{            }\PYG{n}{relDivX}\PYG{+w}{ }\PYG{o}{+=}\PYG{+w}{ }\PYG{n}{theorValue}\PYG{p}{.}\PYG{n}{Item1}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{theorValue}\PYG{p}{.}\PYG{n}{Item1}\PYG{p}{;}
+\PYG{+w}{            }\PYG{n}{relDivY}\PYG{+w}{ }\PYG{o}{+=}\PYG{+w}{ }\PYG{n}{theorValue}\PYG{p}{.}\PYG{n}{Item2}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{theorValue}\PYG{p}{.}\PYG{n}{Item2}\PYG{p}{;}
+\PYG{+w}{            }\PYG{n}{relDivZ}\PYG{+w}{ }\PYG{o}{+=}\PYG{+w}{ }\PYG{n}{theorValue}\PYG{p}{.}\PYG{n}{Item3}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{theorValue}\PYG{p}{.}\PYG{n}{Item3}\PYG{p}{;}
+
+\PYG{+w}{            }\PYG{n}{iter}\PYG{o}{++}\PYG{p}{;}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{        }\PYG{n}{sw}\PYG{p}{.}\PYG{n}{WriteLine}\PYG{p}{(}\PYG{l+s}{\PYGZdl{}\PYGZdq{}Avg disc: \PYGZob{}absDiscX / iter:E15\PYGZcb{} \PYGZob{}absDiscY / iter:E15\PYGZcb{} \PYGZob{}absDiscZ / iter:E15\PYGZcb{}\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{        }\PYG{n}{sw}\PYG{p}{.}\PYG{n}{WriteLine}\PYG{p}{(}\PYG{l+s}{\PYGZdl{}\PYGZdq{}Rel disc: \PYGZob{}Math.Sqrt(relDiscX / relDivX):E15\PYGZcb{} \PYGZob{}Math.Sqrt(relDiscY / relDivY):E15\PYGZcb{} \PYGZob{}Math.Sqrt(relDiscZ / relDivZ):E15\PYGZcb{}\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{        }\PYG{n}{sw}\PYG{p}{.}\PYG{n}{WriteLine}\PYG{p}{(}\PYG{l+s}{\PYGZdl{}\PYGZdq{}SKO: \PYGZob{}Math.Sqrt(squareDiffX / elemsArr.Length):E15\PYGZcb{} \PYGZob{}Math.Sqrt(squareDiffY / elemsArr.Length):E15\PYGZcb{} \PYGZob{}Math.Sqrt(squareDiffZ / elemsArr.Length):E15\PYGZcb{}\PYGZdq{}}\PYG{p}{);}
+\PYG{+w}{        }\PYG{n}{sw}\PYG{p}{.}\PYG{n}{Close}\PYG{p}{();}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}

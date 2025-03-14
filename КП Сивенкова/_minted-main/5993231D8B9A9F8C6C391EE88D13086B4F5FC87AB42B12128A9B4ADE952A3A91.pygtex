@@ -1,0 +1,107 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{using}\PYG{+w}{ }\PYG{n+nn}{static}\PYG{+w}{ }\PYG{n}{Functions}\PYG{p}{.}\PYG{n}{Function}\PYG{p}{;}
+
+\PYG{k}{namespace}\PYG{+w}{ }\PYG{n+nn}{MathObjects}\PYG{p}{;}
+
+
+\PYG{k}{public}\PYG{+w}{ }\PYG{k}{class}\PYG{+w}{ }\PYG{n+nc}{LocalVector3D}\PYG{+w}{ }\PYG{p}{:}\PYG{+w}{ }\PYG{n}{Vector}
+\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k}{private}\PYG{+w}{ }\PYG{k}{readonly}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{x0}\PYG{p}{;}
+\PYG{+w}{    }\PYG{k}{private}\PYG{+w}{ }\PYG{k}{readonly}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{x1}\PYG{p}{;}
+\PYG{+w}{    }\PYG{k}{private}\PYG{+w}{ }\PYG{k}{readonly}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{y0}\PYG{p}{;}
+\PYG{+w}{    }\PYG{k}{private}\PYG{+w}{ }\PYG{k}{readonly}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{y1}\PYG{p}{;}
+\PYG{+w}{    }\PYG{k}{private}\PYG{+w}{ }\PYG{k}{readonly}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{z0}\PYG{p}{;}
+\PYG{+w}{    }\PYG{k}{private}\PYG{+w}{ }\PYG{k}{readonly}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{z1}\PYG{p}{;}
+\PYG{+w}{    }\PYG{k}{private}\PYG{+w}{ }\PYG{k}{readonly}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{xm}\PYG{p}{;}
+\PYG{+w}{    }\PYG{k}{private}\PYG{+w}{ }\PYG{k}{readonly}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{ym}\PYG{p}{;}
+\PYG{+w}{    }\PYG{k}{private}\PYG{+w}{ }\PYG{k}{readonly}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{zm}\PYG{p}{;}
+\PYG{+w}{    }\PYG{k}{private}\PYG{+w}{ }\PYG{k}{readonly}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{;}
+
+\PYG{+w}{    }\PYG{k}{private}\PYG{+w}{ }\PYG{n}{LocalMatrixM3D}\PYG{+w}{ }\PYG{n}{M}\PYG{p}{;}
+
+\PYG{+w}{    }\PYG{k}{public}\PYG{+w}{ }\PYG{k}{override}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{k}{this}\PYG{p}{[}\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{i}\PYG{p}{]}\PYG{+w}{ }
+\PYG{+w}{    }\PYG{p}{\PYGZob{}}\PYG{+w}{ }
+\PYG{+w}{        }\PYG{k}{get}\PYG{+w}{ }
+\PYG{+w}{        }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n+nf}{ScalarMult}\PYG{p}{((}\PYG{k+kt}{double}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{p}{)}\PYG{+w}{ }\PYG{n}{a}\PYG{p}{,}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{double}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{p}{)}\PYG{+w}{ }\PYG{n}{b}\PYG{p}{)}\PYG{+w}{ }
+\PYG{+w}{            }\PYG{o}{=\PYGZgt{}}\PYG{+w}{ }\PYG{n}{a}\PYG{p}{.}\PYG{n}{Item1}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{b}\PYG{p}{.}\PYG{n}{Item1}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{a}\PYG{p}{.}\PYG{n}{Item2}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{b}\PYG{p}{.}\PYG{n}{Item2}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{a}\PYG{p}{.}\PYG{n}{Item3}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{b}\PYG{p}{.}\PYG{n}{Item3}\PYG{p}{;}
+
+\PYG{+w}{            }\PYG{p}{(}\PYG{k+kt}{double}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{p}{)}\PYG{+w}{ }\PYG{n}{Divide}\PYG{+w}{ }\PYG{p}{((}\PYG{k+kt}{double}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{p}{)}\PYG{+w}{ }\PYG{n}{v}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{sc}\PYG{p}{)}
+\PYG{+w}{            }\PYG{o}{=\PYGZgt{}}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{v}\PYG{p}{.}\PYG{n}{Item1}\PYG{+w}{ }\PYG{o}{/}\PYG{+w}{ }\PYG{n}{sc}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{v}\PYG{p}{.}\PYG{n}{Item2}\PYG{+w}{ }\PYG{o}{/}\PYG{+w}{ }\PYG{n}{sc}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{v}\PYG{p}{.}\PYG{n}{Item3}\PYG{+w}{ }\PYG{o}{/}\PYG{+w}{ }\PYG{n}{sc}\PYG{p}{);}\PYG{+w}{ }
+
+\PYG{+w}{            }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n+nf}{Length}\PYG{p}{((}\PYG{k+kt}{double}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{p}{)}\PYG{+w}{ }\PYG{n}{v}\PYG{p}{)}\PYG{+w}{ }
+\PYG{+w}{            }\PYG{o}{=\PYGZgt{}}\PYG{+w}{ }\PYG{n}{Math}\PYG{p}{.}\PYG{n}{Sqrt}\PYG{p}{(}\PYG{n}{Math}\PYG{p}{.}\PYG{n}{Pow}\PYG{p}{(}\PYG{n}{v}\PYG{p}{.}\PYG{n}{Item1}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{2}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{Math}\PYG{p}{.}\PYG{n}{Pow}\PYG{p}{(}\PYG{n}{v}\PYG{p}{.}\PYG{n}{Item2}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{2}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{Math}\PYG{p}{.}\PYG{n}{Pow}\PYG{p}{(}\PYG{n}{v}\PYG{p}{.}\PYG{n}{Item3}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{2}\PYG{p}{));}
+
+\PYG{+w}{            }\PYG{c+c1}{// Очень спорно.}
+\PYG{+w}{            }\PYG{n}{List}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{double}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{vect}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{[}
+\PYG{+w}{                }\PYG{n}{ScalarMult}\PYG{p}{(}\PYG{n}{F}\PYG{p}{(}\PYG{n}{xm}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{y0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{z0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m}{1.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{)),}
+\PYG{+w}{                }\PYG{n}{ScalarMult}\PYG{p}{(}\PYG{n}{F}\PYG{p}{(}\PYG{n}{xm}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{y1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{z0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m}{1.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{)),}
+\PYG{+w}{                }\PYG{n}{ScalarMult}\PYG{p}{(}\PYG{n}{F}\PYG{p}{(}\PYG{n}{xm}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{y0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{z1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m}{1.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{)),}
+\PYG{+w}{                }\PYG{n}{ScalarMult}\PYG{p}{(}\PYG{n}{F}\PYG{p}{(}\PYG{n}{xm}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{y1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{z1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m}{1.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{)),}
+\PYG{+w}{                }
+\PYG{+w}{                }\PYG{n}{ScalarMult}\PYG{p}{(}\PYG{n}{F}\PYG{p}{(}\PYG{n}{x0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ym}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{z0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{1.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{)),}
+\PYG{+w}{                }\PYG{n}{ScalarMult}\PYG{p}{(}\PYG{n}{F}\PYG{p}{(}\PYG{n}{x1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ym}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{z0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{1.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{)),}
+\PYG{+w}{                }\PYG{n}{ScalarMult}\PYG{p}{(}\PYG{n}{F}\PYG{p}{(}\PYG{n}{x0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ym}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{z1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{1.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{)),}
+\PYG{+w}{                }\PYG{n}{ScalarMult}\PYG{p}{(}\PYG{n}{F}\PYG{p}{(}\PYG{n}{x1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ym}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{z1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{1.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{)),}
+\PYG{+w}{                }
+\PYG{+w}{                }\PYG{n}{ScalarMult}\PYG{p}{(}\PYG{n}{F}\PYG{p}{(}\PYG{n}{x0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{y0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{zm}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{1.0D}\PYG{p}{)),}
+\PYG{+w}{                }\PYG{n}{ScalarMult}\PYG{p}{(}\PYG{n}{F}\PYG{p}{(}\PYG{n}{x1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{y0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{zm}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{1.0D}\PYG{p}{)),}
+\PYG{+w}{                }\PYG{n}{ScalarMult}\PYG{p}{(}\PYG{n}{F}\PYG{p}{(}\PYG{n}{x0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{y1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{zm}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{1.0D}\PYG{p}{)),}
+\PYG{+w}{                }\PYG{n}{ScalarMult}\PYG{p}{(}\PYG{n}{F}\PYG{p}{(}\PYG{n}{x1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{y1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{zm}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{1.0D}\PYG{p}{))}\PYG{+w}{ }
+\PYG{+w}{            }\PYG{p}{];}
+\PYG{+w}{            }
+\PYG{+w}{            }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{ans}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{;}
+\PYG{+w}{            }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{j}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{j}\PYG{+w}{ }\PYG{o}{\PYGZlt{}}\PYG{+w}{ }\PYG{n}{vect}\PYG{p}{.}\PYG{n}{Count}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{j}\PYG{o}{++}\PYG{p}{)}
+\PYG{+w}{                }\PYG{n}{ans}\PYG{+w}{ }\PYG{o}{+=}\PYG{+w}{ }\PYG{n}{M}\PYG{p}{[}\PYG{n}{i}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{j}\PYG{p}{]}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{vect}\PYG{p}{[}\PYG{n}{j}\PYG{p}{];}
+\PYG{+w}{            }\PYG{k}{return}\PYG{+w}{ }\PYG{n}{ans}\PYG{p}{;}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{    }\PYG{k}{public}\PYG{+w}{ }\PYG{n+nf}{LocalVector3D}\PYG{p}{(}\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{x0}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{x1}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{y0}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{y1}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{z0}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{z1}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{)}
+\PYG{+w}{    }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k}{this}\PYG{p}{.}\PYG{n}{x0}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{x0}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k}{this}\PYG{p}{.}\PYG{n}{x1}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{x1}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k}{this}\PYG{p}{.}\PYG{n}{y0}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{y0}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k}{this}\PYG{p}{.}\PYG{n}{y1}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{y1}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k}{this}\PYG{p}{.}\PYG{n}{z0}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{z0}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k}{this}\PYG{p}{.}\PYG{n}{z1}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{z1}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k}{this}\PYG{p}{.}\PYG{n}{t}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{;}
+\PYG{+w}{        }\PYG{n}{xm}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0.5D}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{x1}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{x0}\PYG{p}{);}
+\PYG{+w}{        }\PYG{n}{ym}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0.5D}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{y1}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{y0}\PYG{p}{);}
+\PYG{+w}{        }\PYG{n}{zm}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0.5D}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{z1}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{z0}\PYG{p}{);}
+\PYG{+w}{        }\PYG{n}{M}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{p}{(}\PYG{l+m}{1.0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{x1}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{n}{x0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{y1}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{n}{y0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{z1}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{n}{z0}\PYG{p}{);}
+\PYG{+w}{        }\PYG{n}{Generate}\PYG{p}{();}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{    }\PYG{k}{private}\PYG{+w}{ }\PYG{k}{void}\PYG{+w}{ }\PYG{n+nf}{Generate}\PYG{p}{()}
+\PYG{+w}{    }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n+nf}{ScalarMult}\PYG{p}{((}\PYG{k+kt}{double}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{p}{)}\PYG{+w}{ }\PYG{n}{a}\PYG{p}{,}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{double}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{p}{)}\PYG{+w}{ }\PYG{n}{b}\PYG{p}{)}\PYG{+w}{ }
+\PYG{+w}{        }\PYG{o}{=\PYGZgt{}}\PYG{+w}{ }\PYG{n}{a}\PYG{p}{.}\PYG{n}{Item1}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{b}\PYG{p}{.}\PYG{n}{Item1}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{a}\PYG{p}{.}\PYG{n}{Item2}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{b}\PYG{p}{.}\PYG{n}{Item2}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{a}\PYG{p}{.}\PYG{n}{Item3}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{b}\PYG{p}{.}\PYG{n}{Item3}\PYG{p}{;}
+
+\PYG{+w}{        }\PYG{n}{List}\PYG{o}{\PYGZlt{}}\PYG{k+kt}{double}\PYG{o}{\PYGZgt{}}\PYG{+w}{ }\PYG{n}{vect}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{[}
+\PYG{+w}{            }\PYG{n}{ScalarMult}\PYG{p}{(}\PYG{n}{F}\PYG{p}{(}\PYG{n}{xm}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{y0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{z0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m}{1.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{)),}
+\PYG{+w}{            }\PYG{n}{ScalarMult}\PYG{p}{(}\PYG{n}{F}\PYG{p}{(}\PYG{n}{xm}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{y1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{z0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m}{1.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{)),}
+\PYG{+w}{            }\PYG{n}{ScalarMult}\PYG{p}{(}\PYG{n}{F}\PYG{p}{(}\PYG{n}{xm}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{y0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{z1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m}{1.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{)),}
+\PYG{+w}{            }\PYG{n}{ScalarMult}\PYG{p}{(}\PYG{n}{F}\PYG{p}{(}\PYG{n}{xm}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{y1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{z1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m}{1.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{)),}
+\PYG{+w}{            }
+\PYG{+w}{            }\PYG{n}{ScalarMult}\PYG{p}{(}\PYG{n}{F}\PYG{p}{(}\PYG{n}{x0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ym}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{z0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{1.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{)),}
+\PYG{+w}{            }\PYG{n}{ScalarMult}\PYG{p}{(}\PYG{n}{F}\PYG{p}{(}\PYG{n}{x1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ym}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{z0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{1.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{)),}
+\PYG{+w}{            }\PYG{n}{ScalarMult}\PYG{p}{(}\PYG{n}{F}\PYG{p}{(}\PYG{n}{x0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ym}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{z1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{1.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{)),}
+\PYG{+w}{            }\PYG{n}{ScalarMult}\PYG{p}{(}\PYG{n}{F}\PYG{p}{(}\PYG{n}{x1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ym}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{z1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{1.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{)),}
+\PYG{+w}{            }
+\PYG{+w}{            }\PYG{n}{ScalarMult}\PYG{p}{(}\PYG{n}{F}\PYG{p}{(}\PYG{n}{x0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{y0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{zm}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{1.0D}\PYG{p}{)),}
+\PYG{+w}{            }\PYG{n}{ScalarMult}\PYG{p}{(}\PYG{n}{F}\PYG{p}{(}\PYG{n}{x1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{y0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{zm}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{1.0D}\PYG{p}{)),}
+\PYG{+w}{            }\PYG{n}{ScalarMult}\PYG{p}{(}\PYG{n}{F}\PYG{p}{(}\PYG{n}{x0}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{y1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{zm}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{1.0D}\PYG{p}{)),}
+\PYG{+w}{            }\PYG{n}{ScalarMult}\PYG{p}{(}\PYG{n}{F}\PYG{p}{(}\PYG{n}{x1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{y1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{zm}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{t}\PYG{p}{),}\PYG{+w}{ }\PYG{p}{(}\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{1.0D}\PYG{p}{))}\PYG{+w}{ }
+\PYG{+w}{        }\PYG{p}{];}
+
+\PYG{+w}{        }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{n}{ans}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{;}
+\PYG{+w}{        }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{i}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{i}\PYG{+w}{ }\PYG{o}{\PYGZlt{}}\PYG{+w}{ }\PYG{n}{vect}\PYG{p}{.}\PYG{n}{Count}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{i}\PYG{o}{++}\PYG{p}{)}
+\PYG{+w}{        }\PYG{p}{\PYGZob{}}
+\PYG{+w}{            }\PYG{k}{for}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{j}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{j}\PYG{+w}{ }\PYG{o}{\PYGZlt{}}\PYG{+w}{ }\PYG{n}{vect}\PYG{p}{.}\PYG{n}{Count}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{j}\PYG{o}{++}\PYG{p}{)}
+\PYG{+w}{                }\PYG{n}{ans}\PYG{+w}{ }\PYG{o}{+=}\PYG{+w}{ }\PYG{n}{M}\PYG{p}{[}\PYG{n}{i}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{j}\PYG{p}{]}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{vect}\PYG{p}{[}\PYG{n}{j}\PYG{p}{];}
+\PYG{+w}{            }\PYG{n}{ans}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m}{0.0D}\PYG{p}{;}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}

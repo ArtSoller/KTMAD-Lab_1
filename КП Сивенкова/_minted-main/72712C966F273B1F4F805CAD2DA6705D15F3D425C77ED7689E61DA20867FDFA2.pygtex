@@ -1,0 +1,36 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{err}{﻿}\PYG{c+cp}{\PYGZsh{}define TESTING}
+\PYG{c+c1}{// RELEASE}
+\PYG{c+c1}{// TESTING}
+\PYG{c+cp}{\PYGZsh{}define NODRAWING}
+\PYG{c+cp}{\PYGZsh{}define SOLVE2DIM}
+\PYG{k}{using}\PYG{+w}{ }\PYG{n+nn}{Project}\PYG{p}{;}
+\PYG{k}{using}\PYG{+w}{ }\PYG{n+nn}{System.Globalization}\PYG{p}{;}
+\PYG{k}{using}\PYG{+w}{ }\PYG{n+nn}{Solver}\PYG{p}{;}
+\PYG{k}{using}\PYG{+w}{ }\PYG{n+nn}{Manager}\PYG{p}{;}
+\PYG{k}{using}\PYG{+w}{ }\PYG{n+nn}{System.Numerics}\PYG{p}{;}
+\PYG{k}{using}\PYG{+w}{ }\PYG{n+nn}{Processor}\PYG{p}{;}
+\PYG{k}{using}\PYG{+w}{ }\PYG{n+nn}{Solution}\PYG{p}{;}
+\PYG{k}{using}\PYG{+w}{ }\PYG{n+nn}{MathObjects}\PYG{p}{;}
+\PYG{k}{using}\PYG{+w}{ }\PYG{n+nn}{Functions}\PYG{p}{;}
+\PYG{k}{using}\PYG{+w}{ }\PYG{n+nn}{Grid}\PYG{p}{;}
+\PYG{k}{using}\PYG{+w}{ }\PYG{n+nn}{DataStructs}\PYG{p}{;}
+
+
+\PYG{n}{CultureInfo}\PYG{p}{.}\PYG{n}{CurrentCulture}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{CultureInfo}\PYG{p}{.}\PYG{n}{InvariantCulture}\PYG{p}{;}
+
+\PYG{k+kt}{string}\PYG{+w}{ }\PYG{n}{BordersInfo}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Path}\PYG{p}{.}\PYG{n}{GetFullPath}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}../../../../Data/Input/Borders.dat\PYGZdq{}}\PYG{p}{);}
+\PYG{k+kt}{string}\PYG{+w}{ }\PYG{n}{AnswerPath}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Path}\PYG{p}{.}\PYG{n}{GetFullPath}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}../../../../Data/Output/\PYGZdq{}}\PYG{p}{);}
+\PYG{k+kt}{string}\PYG{+w}{ }\PYG{n}{TimePath}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{Path}\PYG{p}{.}\PYG{n}{GetFullPath}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}../../../../Data/Input/Time.dat\PYGZdq{}}\PYG{p}{);}
+
+\PYG{n}{FEM3D}\PYG{+w}{ }\PYG{n}{myFEM3D\PYGZus{}test}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{k}{new}\PYG{p}{();}
+\PYG{n}{myFEM3D\PYGZus{}test}\PYG{p}{.}\PYG{n}{ConstructMesh}\PYG{p}{(}\PYG{l+m}{3}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{3}\PYG{p}{,}\PYG{+w}{ }\PYG{l+m}{3}\PYG{p}{);}
+\PYG{n}{myFEM3D\PYGZus{}test}\PYG{p}{.}\PYG{n}{GenerateArrays}\PYG{p}{();}
+\PYG{n}{myFEM3D\PYGZus{}test}\PYG{p}{.}\PYG{n}{ConstructMatrixAndVector}\PYG{p}{();}
+\PYG{n}{myFEM3D\PYGZus{}test}\PYG{p}{.}\PYG{n}{SetSolver}\PYG{p}{(}\PYG{k}{new}\PYG{+w}{ }\PYG{n}{LOS}\PYG{p}{());}
+\PYG{n}{myFEM3D\PYGZus{}test}\PYG{p}{.}\PYG{n}{Solve}\PYG{p}{();}
+\PYG{n}{myFEM3D\PYGZus{}test}\PYG{p}{.}\PYG{n}{TestOutput}\PYG{p}{(}\PYG{n}{AnswerPath}\PYG{p}{);}
+\PYG{n}{myFEM3D\PYGZus{}test}\PYG{p}{.}\PYG{n}{WriteData}\PYG{p}{(}\PYG{n}{AnswerPath}\PYG{p}{);}
+
+\PYG{k}{return}\PYG{+w}{ }\PYG{l+m}{0}\PYG{p}{;}
+\end{Verbatim}

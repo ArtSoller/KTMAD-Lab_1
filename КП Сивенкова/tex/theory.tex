@@ -1,0 +1,315 @@
+\chapter{Теоретическая часть}
+
+\section{Математическая постановка}
+
+Решение задачи в трехмерных декартовых координатах, удовлетворяющей расчетной области $\Omega$, будем искать из следующего уравнения:
+
+\begin{equation} \label{eq_1_9}
+	\text{rot} \frac{1}{\mu} \text{rot} \overrightarrow{\textbf{A}} + \gamma\overrightarrow{\textbf{A}} = \overrightarrow{\textbf{J}}
+\end{equation}
+
+Эквивалентная вариационная постановка для уравнения (\ref{eq_1_9}) имеет вид:
+
+\begin{equation} \label{eq_1_11}
+	\int \limits_{\Omega} \frac{1}{\mu} \text{rot} \overrightarrow{\textbf{A}} \text{rot} \overrightarrow{\textbf{$\Psi$}} d \Omega + 
+	\int \limits_{\Omega} \gamma\overrightarrow{\textbf{A}} \overrightarrow{\textbf{$\Psi$}} d \Omega  = \int \limits_{\Omega} \overrightarrow{\textbf{J}} \overrightarrow{\textbf{$\Psi$}}  d \Omega.
+\end{equation}
+
+\section{Принципы построения локальных векторов, матриц жесткости и масс в двумерном векторном МКЭ}
+
+Решение будем искать, используя билинейные базисные вектор-функции  на прямоугольниках $\Omega_{rs} = [x_r, x_{r+1}] \times [y_s, y_{s+1}]$:
+
+\begin{equation*}
+	\overrightarrow{\psi}_1 = \left(
+	\begin{array}{c}
+		0\\
+		\frac{x_{r + 1} - x}{h_x}\\
+	\end{array}
+	\right),
+	\hspace{10mm}
+	\overrightarrow{\psi}_2 = \left(
+	\begin{array}{c}
+		0\\
+		\frac{x - x_r}{h_x}\\
+	\end{array}
+	\right),
+\end{equation*}
+
+\begin{equation*}
+	\overrightarrow{\psi}_3 = \left(
+	\begin{array}{c}
+		\frac{y_{s + 1} - y}{h_y}\\
+		0\\
+	\end{array}
+	\right),
+	\hspace{10mm}
+	\overrightarrow{\psi}_4 = \left(
+	\begin{array}{c}
+		\frac{y - y_s}{h_y}\\
+		0\\
+	\end{array}
+	\right).
+\end{equation*}
+
+где $h_x = x_{r + 1} - x_r$, $h_y = y_{s + 1} - y_s$.
+
+Локальная матрица жёсткости $\hat{\textbf{G}}$ на векторном прямоугольнике при $\overline{\mu} = const$ принимает вид:
+
+\begin{equation*}
+	\hat{\textbf{G}} = \frac{1}{\overline{\mu}} \left(
+	\begin{array}{rrrr}
+		\frac{h_y}{h_x} & -\frac{h_y}{h_x} & -1 & 1 \\
+		-\frac{h_y}{h_x} & \frac{h_y}{h_x} & 1 & -1 \\
+		-1 & 1 & \frac{h_x}{h_y} & -\frac{h_x}{h_y} \\
+		 1 & -1 & -\frac{h_x}{h_y} & \frac{h_x}{h_y} \\
+	\end{array}
+	\right).
+\end{equation*}
+
+Локальная матрица масс $\hat{\textbf{M}}$ на векторном прямоугольнике при $\overline{\gamma} = const$ принимает вид:
+
+\begin{equation*}
+	\hat{\textbf{M}} = \overline{\gamma}\frac{h_x h_y}{6} \left(
+	\begin{array}{rrrr}
+		2 & 1 & 0 & 0 \\
+		1 & 2 & 0 & 0 \\
+		0 & 0 & 2 & 1 \\
+		0 & 0 & 1 & 2 \\
+	\end{array}
+	\right).
+\end{equation*}
+
+Локальный вектор правой части $\hat{\textbf{b}}$ на векторном прямоугольнике принимает вид:
+
+\begin{equation*}
+	\hat{\textbf{b}} = \hat{\textbf{M}} \left(
+	\begin{array}{r}
+		F_y(x_r, y_{s+\frac{1}{2}}) \\
+		F_y(x_{r+1}, y_{s+\frac{1}{2}}) \\
+		F_x(x_{r+\frac{1}{2}}, y_s)  \\
+		F_x(x_{r+\frac{1}{2}}, y_{s+1})  \\
+	\end{array}
+	\right).
+\end{equation*}
+
+
+\section{Принципы построения локальных векторов, матриц жесткости и масс в трехмерном векторном МКЭ}
+
+Решение будем искать, используя билинейные базисные вектор-функции, задаваемые линейными функциями на параллелепипиде $\Omega_{rsp} = [x_r, x_{r+1}] \times [y_s, y_{s+1}] \times [z_p, z_{p+1}]$ следующего вида:
+
+\begin{equation} \label{eq_1_12}
+	X_1(x) = \frac{x_{r + 1} - x}{x_{r + 1} - x_r}, \hspace{10mm} X_2(x) = \frac{x - x_r}{x_{r + 1} - x_r},
+\end{equation}
+
+\begin{equation} \label{eq_1_13}
+	Y_1(y) = \frac{y_{s + 1} - y}{y_{s + 1} - y_s}, \hspace{10mm} Y_2(y) = \frac{y - y_s}{y_{s + 1} - y_s},
+\end{equation}
+
+\begin{equation} \label{eq_1_14}
+	Z_1(z) = \frac{z_{p + 1} - z}{z_{p + 1} - z_p}, \hspace{10mm} Z_2(z) = \frac{z - z_p}{z_{p + 1} - z_p}.
+\end{equation}
+
+Тогда базисная вектор-функция, ассоциированная с ребром $\{y = y_s,\\ z = z_p\}$ имеет вид:
+
+\begin{equation*}
+	\overrightarrow{\psi}_1 = \left(
+	\begin{array}{c}
+		\frac{y_{s + 1} - y}{h_y} \cdot \frac{z_{p + 1} - z}{h_z}\\
+		0\\
+		0\\
+	\end{array}
+	\right),
+\end{equation*}
+где $h_y = y_{s + 1} - y_s$ $h_z = z_{p + 1} - z_p$.
+
+Полный список базисных вектор-функций на параллелепипиде $\Omega_{rsp} = [x_r, x_{r+1}] \times [y_s, y_{s+1}] \times [z_p, z_{p+1}]$ можно записать в виде:
+
+\begin{equation*}
+	\overrightarrow{\psi}_1 = \left(
+\begin{array}{c}
+		Y_1 \cdot Z_1\\
+		0\\
+		0\\
+\end{array}
+	\right),
+	\hspace{10mm}
+	\overrightarrow{\psi}_2 = \left(
+\begin{array}{c}
+	Y_2 \cdot Z_1\\
+	0\\
+	0\\
+\end{array}
+\right),
+	\hspace{10mm}
+	\overrightarrow{\psi}_3 = \left(
+\begin{array}{c}
+	Y_1 \cdot Z_2\\
+	0\\
+	0\\
+\end{array}
+\right),
+\end{equation*}
+
+\begin{equation*}
+	\overrightarrow{\psi}_4 = \left(
+	\begin{array}{c}
+		Y_2 \cdot Z_2\\
+		0\\
+		0\\
+	\end{array}
+	\right),
+	\hspace{10mm}
+	\overrightarrow{\psi}_5 = \left(
+	\begin{array}{c}
+		0\\
+		X_1 \cdot Z_1\\
+		0\\
+	\end{array}
+	\right),
+	\hspace{10mm}
+	\overrightarrow{\psi}_6 = \left(
+	\begin{array}{c}
+		0\\
+		X_2 \cdot Z_1\\
+		0\\
+	\end{array}
+	\right),
+\end{equation*}
+
+
+\begin{equation*}
+	\overrightarrow{\psi}_7 = \left(
+	\begin{array}{c}
+		0\\
+		X_1 \cdot Z_2\\
+		0\\
+	\end{array}
+	\right),
+	\hspace{10mm}
+	\overrightarrow{\psi}_8 = \left(
+	\begin{array}{c}
+		0\\
+		X_2 \cdot Z_2\\
+		0\\
+	\end{array}
+	\right),
+	\hspace{10mm}
+	\overrightarrow{\psi}_9 = \left(
+	\begin{array}{c}
+		Y_1 \cdot Z_2\\
+		0\\
+		0\\
+	\end{array}
+	\right),
+\end{equation*}
+
+\begin{equation*}
+	\overrightarrow{\psi}_{10} = \left(
+	\begin{array}{c}
+		Y_1 \cdot Z_1\\
+		0\\
+		0\\
+	\end{array}
+	\right),
+	\hspace{10mm}
+	\overrightarrow{\psi}_{11} = \left(
+	\begin{array}{c}
+		Y_2 \cdot Z_1\\
+		0\\
+		0\\
+	\end{array}
+	\right),
+	\hspace{10mm}
+	\overrightarrow{\psi}_{12} = \left(
+	\begin{array}{c}
+		Y_1 \cdot Z_2\\
+		0\\
+		0\\
+	\end{array}
+	\right),
+\end{equation*}
+
+Формулы для вычисления глобальных матриц жёсткости $\textbf{G}$ и масс $\textbf{M}$, определяющих глобальную матрицу $\textbf{C} = \textbf{G} + \textbf{M}$ конечноэлеметной СЛАУ имеют вид:
+
+\begin{equation} \label{eq_1_15}
+	G_{ij} = \int \limits_{\Omega} \frac{1}{\mu} \text{rot} \overrightarrow{\textbf{$\Psi_i$}} \cdot \text{rot} \overrightarrow{\textbf{$\Psi_j$}} d \Omega, \hspace{15mm} M_{ij} = \int \limits_{\Omega} \gamma \overrightarrow{\textbf{$\Psi_i$}} \cdot \overrightarrow{\textbf{$\Psi_j$}} d \Omega.
+\end{equation}
+
+Компоненты глобального вектора $\textbf{b}$ конечноэлементной СЛАУ определяются соотношением:
+
+\begin{equation} \label{eq_1_15}
+	b_{i} = \int \limits_{\Omega} \overrightarrow{\textbf{F}} \cdot \overrightarrow{\textbf{$\Psi_i$}} d \Omega.
+\end{equation}
+
+Локальная матрица жёсткости $\hat{\textbf{G}}$ на векторном параллелепипеде при $\overline{\mu} = const$ принимает вид:
+
+\begin{equation*}
+	\hat{\textbf{G}} = \frac{1}{\overline{\mu}} \left(
+	\begin{array}{ccc}
+		\frac{h_x h_y}{6h_z}\textbf{G}_1 + \frac{h_x h_z}{6h_y}\textbf{G}_2 & -\frac{h_z}{6}\textbf{G}_2 & \frac{h_y}{6}\textbf{G}_3 \\
+		-\frac{h_z}{6}\textbf{G}_2 & \frac{h_x h_y}{6h_z}\textbf{G}_1 + \frac{h_y h_z}{6h_x}\textbf{G}_2 & -\frac{h_x}{6}\textbf{G}_1 \\
+		\frac{h_y}{6}\textbf{G}^\text{T}_3 & -\frac{h_x}{6}\textbf{G}_1 & \frac{h_x h_z}{6h_y}\textbf{G}_1 + \frac{h_y h_z}{6h_x}\textbf{G}_2 \\
+	\end{array}
+	\right),
+\end{equation*}
+где
+\begin{equation*}
+	\textbf{G}_1 = \left(
+	\begin{array}{rrrr}
+		 2 & 1 & -2 & -1 \\
+		 1 & 2 & -1 & -2 \\
+		 -2 & -1 & 2 & 1 \\
+		 -1 & -2 & 1 & 2 \\
+	\end{array}
+	\right),
+	\textbf{G}_2 = \left(
+	\begin{array}{rrrr}
+		2 & -2 & 1 & -1 \\
+		-2 & 2 & -1 & 2 \\
+		1 & -1 & 2 & -2 \\
+		-1 & 1 & -2 & 2 \\
+	\end{array}
+	\right),
+\end{equation*}
+
+\begin{equation*}
+	\textbf{G}_3 = \left(
+	\begin{array}{rrrr}
+		-2 & 2 & -1 & 1 \\
+		-1 & 1 & -2 & 2 \\
+		2 & -2 & 1 & -1 \\
+		1 & -1 & 2 & -2 \\
+	\end{array}
+	\right).
+\end{equation*}
+
+Матрицу $\hat{\textbf{M}}$ можно представить в виде:
+
+\begin{equation*}
+	\textbf{M} = \left(
+	\begin{array}{ccc}
+		\textbf{D} & \textbf{O} & \textbf{O}\\
+		\textbf{O} & \textbf{D} & \textbf{O}\\
+		\textbf{O} & \textbf{O} & \textbf{D} \\
+	\end{array}
+	\right),
+\end{equation*}
+где $\textbf{O}$ - матрица $4 \times 4$, состоящая из нулей подматрица, а $\textbf{D}$ определяется следующим образом:
+
+\begin{equation*}
+	\textbf{D} = \left(
+	\begin{array}{rrrr}
+		4 & 2 & 2 & 1 \\
+		2 & 4 & 1 & 2 \\
+		2 & 1 & 4 & 2 \\
+		1 & 2 & 2 & 4 \\
+	\end{array}
+	\right).
+\end{equation*}
+
+Локальный вектор правой части определяется в виде $\hat{\textbf{b}}_i = \hat{\textbf{M}} \cdot \hat{\textbf{f}}_i$, где 
+\begin{equation} \label{eq_1_17}
+\hat{\textbf{f}}_i = \overrightarrow{\textbf{F}}(\hat{x}_c, \hat{y}_c, \hat{z}_c) \cdot \overrightarrow{\textbf{v}} / l,
+\end{equation}
+$\hat{x}_c, \hat{y}_c, \hat{z}_c$ - координаты центра ребра, $\overrightarrow{\textbf{v}}$ - вектор, направленный вдоль ребра $\Gamma$ и сонаправленный с базисной вектор-функцией $\overrightarrow{\psi}_i$, $l$ - длина данного вектора.
+% Далее глава тестирования.
