@@ -6,22 +6,22 @@ namespace Functions;
 public static class Function
 {
 
-    public static (double, double) A(double x, double y, double t) => (y * y,
-                                                                     x * x);
+    public static (double, double) A(double x, double y, double t) => (Math.Exp(y),
+                                                                       Math.Exp(x));
 
-    public static (double, double) F(double x, double y, double t) => (y * y - 2,
-                                                                   x * x - 2);
+    public static (double, double) F(double x, double y, double t) => (0.0D,
+                                                                       0.0D);
 
     // Функция правой части.
-    public static (double, double, double) F(double x, double y, double z, double t) => (y * y * z * z - 2 * (y * y + z * z),
-                                                                                         x * x * z * z - 2 * (x * x + z * z),
-                                                                                         x * x * y * y - 2 * (x * x + y * y));
+    public static (double, double, double) F(double x, double y, double z, double t) => (0.0D,
+                                                                                         0.0D,
+                                                                                         0.0D);
 
 
     //Тестируемая функция.
-    public static (double, double, double) A(double x, double y, double z, double t) => (y * y * z * z,
-                                                                                         x * x * z * z,
-                                                                                         x * x * y * y);
+    public static (double, double, double) A(double x, double y, double z, double t) => (Math.Exp(y),
+                                                                                         Math.Exp(z),
+                                                                                         Math.Exp(x));
 
     /*
                         3

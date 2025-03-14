@@ -28,6 +28,11 @@ public class FEM3D : FEM
 
     public ArrayOfRibs ribsArr;
 
+    public FEM3D(Mesh3Dim mesh)
+    {
+        this.mesh = mesh;
+    }
+
 
     public FEM3D()
     {
@@ -80,18 +85,14 @@ public class FEM3D : FEM
 
     
 
-    public void GenerateArrays(string MeshInfo, string BordersInfo)
+    public void GenerateArrays()
     {
         timeMesh = [1.0D];
         if (mesh is null) throw new ArgumentNullException("mesh is null!");
-        MeshReader.ReadMesh(MeshInfo, BordersInfo, ref mesh);
-        MeshGenerator.GenerateMesh(ref mesh);
         pointsArr = MeshGenerator.GenerateListOfPoints(mesh);
         ribsArr = MeshGenerator.GenerateListOfRibs(mesh, pointsArr);
         elemsArr = MeshGenerator.GenerateListOfElems(mesh, ribsArr);
         bordersArr = MeshGenerator.GenerateListOfBorders(mesh);
-        Console.WriteLine();
-        //MeshGenerator.SelectRibs(ref ribsArr, ref elemsArr);
     }
 
     public void ConstructMatrixAndVector()
@@ -186,7 +187,7 @@ public class FEM3D : FEM
 
         for (int t = 0; t < timeMesh.Length; t++)
         {
-            using var sw = new StreamWriter(path + $"/A_phi/Answer3D/Answer_{timeMesh[t]}.txt");
+            using var sw = new StreamWriter(path + $"Answer_3D_{timeMesh[t]}.txt");
             for (int i = 0; i < Solutions[t].Size; i++)
                 if (i == 16 || i == 24 || i == 26 || i == 27 || i == 29 || i == 37)
                     sw.WriteLine($"{i} {Solutions[t][i]:E8}");
@@ -268,7 +269,7 @@ public class FEM3D : FEM
 
     public void TestOutput(string path)
     {
-        using var sw = new StreamWriter(path + "/A_phi/Answer3D/Answer_Test.txt");
+        using var sw = new StreamWriter(path + "Answer_Test_3D.txt");
         
         var absDiscX = 0.0D;
         var absDiscY = 0.0D;

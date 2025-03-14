@@ -353,7 +353,73 @@ public static class MeshGenerator
         }
     }
 
-    public static ArrayOfBorders GenerateListOfBorders(Mesh mesh)
+    public static ArrayOfBorders GenerateListOfBorders(Mesh3Dim mesh)
+    {
+        var arr = new ArrayOfBorders(null);
+        int nx = mesh.NodesAmountX;
+        int ny = mesh.NodesAmountY;
+        int nz = mesh.NodesAmountZ;
+        int rx = mesh.NodesAmountX - 1;
+ 
+        int nxny = nx * ny;
+        int rxy = (nx - 1) * ny + (ny - 1) * nx;
+         
+         // XY0
+         for (int i = 0; i < ny - 1; i++)
+             for (int j = 0; j < nx - 1; j++)
+                 arr.Add([1, 1, i * (2 * nx - 1) + j, 
+                                i * (2 * nx - 1) + j + nx - 1,
+                                i * (2 * nx - 1) + j + nx,
+                                i * (2 * nx - 1) + j + nx + nx - 1]);
+         
+         
+         // X0Z
+         for (int i = 0; i < nz - 1; i++)
+             for (int j = 0; j < nx - 1; j++)
+                 arr.Add([1, 2, i * (rxy + nxny) + j, 
+                                i * (rxy + nxny) + j + rxy,
+                                i * (rxy + nxny) + j + rxy + 1,
+                                i * (rxy + nxny) + j + rxy + nxny]);
+         
+         
+         // 0YZ
+         for (int i = 0; i < nz - 1; i++)
+             for (int j = 0; j < ny - 1; j++)
+                 arr.Add([1, 3, nx - 1 + i * (rxy + nxny) + j * (2 * nx - 1), 
+                                rxy + i * (rxy + nxny) + j * nx,
+                                rxy + nx + i * (rxy + nxny) + j * nx,
+                                rxy + nxny + nx - 1 + i * (rxy + nxny) + j * (2 * nx - 1)]);
+         
+         // XY1
+         for (int i = 0; i < ny - 1; i++)
+             for (int j = 0; j < nx - 1; j++)
+                 arr.Add([1, 4, (nz - 1) * (rxy + nxny) + j + i * (2 * nx - 1),
+                                (nz - 1) * (rxy + nxny) + nx - 1 + j + i * (2 * nx - 1),
+                                (nz - 1) * (rxy + nxny) + nx + j + i * (2 * nx - 1),
+                                (nz - 1) * (rxy + nxny) + nx + nx - 1 + j + i * (2 * nx - 1)]);
+         
+         // X1Z
+         for (int i = 0; i < nz - 1; i++)
+             for (int j = 0; j < nx - 1; j++)
+                 arr.Add([1, 5, (ny - 1) * nx + (ny - 1) * (nx - 1) + j + i * (rxy + nxny),
+                                (ny - 1) * nx + (ny - 1) * (nx - 1) + nxny - 1 + j + i * (rxy + nxny),
+                                (ny - 1) * nx + (ny - 1) * (nx - 1) + nxny + j + i * (rxy + nxny),
+                                (ny - 1) * nx + (ny - 1) * (nx - 1) + nxny + j + rxy + i * (rxy + nxny)]);
+ 
+         // 1YZ
+         for (int i = 0; i < nz - 1; i++)
+             for (int j = 0; j < ny - 1; j++)
+                 arr.Add([1, 6, nx - 1 + i * (rxy + nxny) + j * (2 * nx - 1) + nx - 1, 
+                                rxy + i * (rxy + nxny) + j * nx + nx - 1,
+                                rxy + nx + i * (rxy + nxny) + j * nx + nx - 1,
+                                rxy + nxny + nx - 1 + i * (rxy + nxny) + j * (2 * nx - 1) + nx - 1]);
+    
+            return arr;
+        }
+
+
+
+    public static ArrayOfBorders GenerateListOfBorders(Mesh2Dim mesh)
     {
         var arr = new ArrayOfBorders(null);
 

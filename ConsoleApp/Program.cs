@@ -27,29 +27,31 @@ string Borders2DInfo = Path.GetFullPath("../../../../Data/Input/2D/Borders2D.dat
 string Mesh2DInfo = Path.GetFullPath("../../../../Data/Input/2D/WholeMesh2D.dat");
 
 
-Mesh2Dim myMesh = new();
-MeshReader.ReadMesh2D(Mesh2DInfo, Borders2DInfo, ref myMesh);
+// Mesh2Dim myMesh = new();
+// MeshReader.ReadMesh2D(Mesh2DInfo, Borders2DInfo, ref myMesh);
+// MeshGenerator.GenerateMesh(ref myMesh);
+
+// FEM2D myFEM = new(myMesh);
+// myFEM.GenerateArrays();
+// myFEM.ConstructMatrixAndVector();
+// myFEM.SetSolver(new LOS());
+// myFEM.Solve();
+// myFEM.TestOutput2D(AnswerPath);
+// myFEM.TestPoint(4.0 / 3.0, 4.0 / 3.0);
+// myFEM.WriteData2D(AnswerPath);
+
+Mesh3Dim myMesh = new();
+MeshReader.ReadMesh(MeshInfo, BordersInfo, ref myMesh);
 MeshGenerator.GenerateMesh(ref myMesh);
 
-FEM2D myFEM = new(myMesh);
-myFEM.GenerateArrays();
-myFEM.ConstructMatrixAndVector();
-myFEM.SetSolver(new LOS());
-myFEM.Solve();
-myFEM.TestOutput2D(AnswerPath);
-myFEM.TestPoint(4.0 / 3.0, 4.0 / 3.0);
-myFEM.WriteData2D(AnswerPath);
-
-
-
-//myFEM3D_test.ConstructMesh(6, 6, 6);
-//myFEM3D_test.GenerateArrays(MeshInfo, BordersInfo);
-//myFEM3D_test.ConstructMatrixAndVector();
-//myFEM3D_test.SetSolver(new LOS());
-//myFEM3D_test.Solve();
-//myFEM3D_test.TestOutput(AnswerPath);
-//myFEM3D_test.TestPoint(4.0 / 3.0, 4.0 / 3.0, 4.0 / 3.0);
-//myFEM3D_test.WriteData(AnswerPath);
+FEM3D fEM3D = new(myMesh);
+fEM3D.GenerateArrays();
+fEM3D.ConstructMatrixAndVector();
+fEM3D.SetSolver(new LOS());
+fEM3D.Solve();
+fEM3D.TestOutput(AnswerPath);
+fEM3D.TestPoint(4.0 / 3.0, 4.0 / 3.0, 4.0 / 3.0);
+fEM3D.WriteData(AnswerPath);
 
 //myFEM2D_test.ConstructMatrixAndVector();
 //myFEM2D_test.SetSolver(new LOS());
